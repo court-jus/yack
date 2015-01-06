@@ -1,0 +1,21 @@
+# A voir :
+
+sudo apt-get install qt5-qmake libqt5designer5 qt5-default libqt5designer5 libqt5designercomponents5 qttools5-dev qttools5-dev-tools qtbase5-dev-tools
+
+virtualenv -p /usr/bin/python3 .local
+pip install -Ur requirements.txt
+mkdir tmp
+cd tmp
+wget "http://sourceforge.net/projects/pyqt/files/sip/sip-4.16.5/sip-4.16.5.tar.gz"
+wget "http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.4/PyQt-gpl-5.4.tar.gz"
+tar zxvf sip-4.16.5.tar.gz
+tar zxvf PyQt-gpl-5.4.tar.gz
+cd sip-4.16.5
+python configure.py
+make
+sudo make install
+
+cd ../PyQt-gpl-5.4
+python configure.py
+make
+sudo make install

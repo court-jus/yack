@@ -1,3 +1,5 @@
 venv
 build/*
 .*.sw*
+.local
+tmp
