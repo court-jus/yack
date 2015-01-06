@@ -1,21 +1,12 @@
-# A voir :
+sudo apt-get install qt5-qmake libqt5designer5 qt5-default libqt5designer5\
+libqt5designercomponents5 qttools5-dev qttools5-dev-tools qtbase5-dev-tools python3-dev\
+python3-pyqt5 pyqt5-examples pyqt5-dev-tools pyqt5-dev pyqt5-doc qt5-doc
 
-sudo apt-get install qt5-qmake libqt5designer5 qt5-default libqt5designer5 libqt5designercomponents5 qttools5-dev qttools5-dev-tools qtbase5-dev-tools
+YACKDIR=$HOME/src/yack
+TMPDIR=$YACKDIR/tmp
+mkdir -p $TMPDIR
 
-virtualenv -p /usr/bin/python3 .local
+cd $YACKDIR
+virtualenv --system-site-packages -p /usr/bin/python3 $YACKDIR/.local
+. $YACKDIR/.local/bin/activate
 pip install -Ur requirements.txt
-mkdir tmp
-cd tmp
-wget "http://sourceforge.net/projects/pyqt/files/sip/sip-4.16.5/sip-4.16.5.tar.gz"
-wget "http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.4/PyQt-gpl-5.4.tar.gz"
-tar zxvf sip-4.16.5.tar.gz
-tar zxvf PyQt-gpl-5.4.tar.gz
-cd sip-4.16.5
-python configure.py
-make
-sudo make install
-
-cd ../PyQt-gpl-5.4
-python configure.py
-make
-sudo make install
