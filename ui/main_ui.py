@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Tue Jan  6 22:55:45 2015
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Thu Jan  8 13:42:09 2015
+#      by: PyQt5 UI code generator 5.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -15,8 +15,37 @@ class Ui_MainWindow(object):
         MainWindow.resize(806, 736)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.centralwidget)
+        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
+        self.verticalLayout_2 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
+        self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
+        self.showFullPageCB = QtWidgets.QCheckBox(self.centralwidget)
+        self.showFullPageCB.setObjectName("showFullPageCB")
+        self.horizontalLayout.addWidget(self.showFullPageCB)
+        self.rotateButton = QtWidgets.QPushButton(self.centralwidget)
+        self.rotateButton.setText("")
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("icons/rotate.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.rotateButton.setIcon(icon)
+        self.rotateButton.setObjectName("rotateButton")
+        self.horizontalLayout.addWidget(self.rotateButton)
+        self.zoomOutButton = QtWidgets.QPushButton(self.centralwidget)
+        self.zoomOutButton.setText("")
+        icon1 = QtGui.QIcon()
+        icon1.addPixmap(QtGui.QPixmap("icons/zoomout.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.zoomOutButton.setIcon(icon1)
+        self.zoomOutButton.setObjectName("zoomOutButton")
+        self.horizontalLayout.addWidget(self.zoomOutButton)
+        self.zoomInButton = QtWidgets.QPushButton(self.centralwidget)
+        self.zoomInButton.setText("")
+        icon2 = QtGui.QIcon()
+        icon2.addPixmap(QtGui.QPixmap("icons/zoomin.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.zoomInButton.setIcon(icon2)
+        self.zoomInButton.setObjectName("zoomInButton")
+        self.horizontalLayout.addWidget(self.zoomInButton)
+        self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
@@ -24,7 +53,8 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.graphicsView.sizePolicy().hasHeightForWidth())
         self.graphicsView.setSizePolicy(sizePolicy)
         self.graphicsView.setObjectName("graphicsView")
-        self.horizontalLayout.addWidget(self.graphicsView)
+        self.verticalLayout_2.addWidget(self.graphicsView)
+        self.horizontalLayout_2.addLayout(self.verticalLayout_2)
         self.toolBox = QtWidgets.QToolBox(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
@@ -33,7 +63,7 @@ class Ui_MainWindow(object):
         self.toolBox.setSizePolicy(sizePolicy)
         self.toolBox.setObjectName("toolBox")
         self.page1 = QtWidgets.QWidget()
-        self.page1.setGeometry(QtCore.QRect(0, 0, 174, 596))
+        self.page1.setGeometry(QtCore.QRect(0, 0, 165, 621))
         self.page1.setObjectName("page1")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.page1)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -122,13 +152,13 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.groupBox_3)
         self.toolBox.addItem(self.page1, "")
         self.page2 = QtWidgets.QWidget()
-        self.page2.setGeometry(QtCore.QRect(0, 0, 104, 609))
+        self.page2.setGeometry(QtCore.QRect(0, 0, 93, 621))
         self.page2.setObjectName("page2")
         self.toolBox.addItem(self.page2, "")
-        self.horizontalLayout.addWidget(self.toolBox)
+        self.horizontalLayout_2.addWidget(self.toolBox)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 806, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 806, 19))
         self.menubar.setObjectName("menubar")
         self.menuTest = QtWidgets.QMenu(self.menubar)
         self.menuTest.setObjectName("menuTest")
@@ -152,6 +182,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "YACK"))
+        self.showFullPageCB.setText(_translate("MainWindow", "Show full page"))
         self.groupBox.setTitle(_translate("MainWindow", "Cards"))
         self.label.setText(_translate("MainWindow", "Width"))
         self.label_2.setText(_translate("MainWindow", "Height"))

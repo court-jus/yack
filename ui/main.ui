@@ -14,16 +14,64 @@
    <string>YACK</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
     <item>
-     <widget class="QGraphicsView" name="graphicsView">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-     </widget>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="showFullPageCB">
+          <property name="text">
+           <string>Show full page</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="rotateButton">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>icons/rotate.png</normaloff>icons/rotate.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="zoomOutButton">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>icons/zoomout.png</normaloff>icons/zoomout.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="zoomInButton">
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset>
+            <normaloff>icons/zoomin.png</normaloff>icons/zoomin.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGraphicsView" name="graphicsView">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QToolBox" name="toolBox">
@@ -41,8 +89,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>174</width>
-         <height>596</height>
+         <width>165</width>
+         <height>621</height>
         </rect>
        </property>
        <attribute name="label">
@@ -222,7 +270,6 @@
        <zorder>groupBox</zorder>
        <zorder>groupBox_3</zorder>
        <zorder>groupBox_2</zorder>
-       <zorder>label_3</zorder>
        <zorder>groupBox_4</zorder>
       </widget>
       <widget class="QWidget" name="page2">
@@ -230,8 +277,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>104</width>
-         <height>609</height>
+         <width>93</width>
+         <height>621</height>
         </rect>
        </property>
        <attribute name="label">
@@ -248,7 +295,7 @@
      <x>0</x>
      <y>0</y>
      <width>806</width>
-     <height>25</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTest">
