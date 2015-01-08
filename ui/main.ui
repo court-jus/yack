@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>806</width>
+    <width>1021</width>
     <height>736</height>
    </rect>
   </property>
@@ -23,6 +23,44 @@
          <widget class="QCheckBox" name="showFullPageCB">
           <property name="text">
            <string>Show full page</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="currentDisplay">
+          <property name="text">
+           <string>0/1 - 0/9</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="prevPageButton">
+          <property name="text">
+           <string>&lt;&lt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="prevCardButton">
+          <property name="text">
+           <string>&lt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="nextCardButton">
+          <property name="text">
+           <string>&gt;</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="nextPageButton">
+          <property name="text">
+           <string>&gt;&gt;</string>
           </property>
          </widget>
         </item>
@@ -89,8 +127,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>165</width>
-         <height>621</height>
+         <width>192</width>
+         <height>596</height>
         </rect>
        </property>
        <attribute name="label">
@@ -195,11 +233,14 @@
         <item>
          <widget class="QGroupBox" name="groupBox_2">
           <property name="title">
-           <string>Outer margin</string>
+           <string>Shift</string>
           </property>
           <layout class="QFormLayout" name="formLayout_2">
            <item row="0" column="0">
-            <widget class="QSpinBox" name="inputOuterLeft">
+            <widget class="QSpinBox" name="shiftHor">
+             <property name="minimum">
+              <number>-9999</number>
+             </property>
              <property name="maximum">
               <number>9999</number>
              </property>
@@ -208,12 +249,15 @@
            <item row="0" column="1">
             <widget class="QLabel" name="label_3">
              <property name="text">
-              <string>Left</string>
+              <string>Horizontal</string>
              </property>
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QSpinBox" name="inputOuterTop">
+            <widget class="QSpinBox" name="shiftVert">
+             <property name="minimum">
+              <number>-9999</number>
+             </property>
              <property name="maximum">
               <number>9999</number>
              </property>
@@ -222,7 +266,7 @@
            <item row="1" column="1">
             <widget class="QLabel" name="label_5">
              <property name="text">
-              <string>Top</string>
+              <string>Vertical</string>
              </property>
             </widget>
            </item>
@@ -277,8 +321,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>93</width>
-         <height>621</height>
+         <width>104</width>
+         <height>609</height>
         </rect>
        </property>
        <attribute name="label">
@@ -294,8 +338,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>806</width>
-     <height>19</height>
+     <width>1021</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuTest">

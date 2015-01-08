@@ -14,7 +14,7 @@ from wand.image import Image
 # YACK
 from ui.main_ui import Ui_MainWindow
 
-WORK_RESOLUTION = 150
+WORK_RESOLUTION = 300
 BASEDIR = '/tmp'
 # MM = INCH / 25.4
 
@@ -45,29 +45,70 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self._scene = QtWidgets.QGraphicsScene()
         self._image = None
         self._image_cache = {}
+        self._center = [0, 0]
+        self.currentPage = 0
+        self.pageCount = 1
+        self.currentCard = 4
         self.graphicsView.setScene(self._scene)
         self.actionExit.triggered.connect(self.close)
         self.inputCardWidth.setValue(CARDW)
         self.inputCardHeight.setValue(CARDH)
         self.inputRows.setValue(TILEH)
         self.inputColumns.setValue(TILEW)
-        self.inputOuterLeft.setValue(MLEFT)
-        self.inputOuterTop.setValue(MTOP)
+        self.shiftHor.setValue(0)
+        self.shiftVert.setValue(0)
         self.inputInnerWidth.setValue(INNW)
         self.inputInnerHeight.setValue(INNH)
         self.actionOpen.triggered.connect(self.chooseFile)
         self.rotateButton.clicked.connect(self.fn1)
         self.zoomInButton.clicked.connect(lambda: self.zoom(1.5))
         self.zoomOutButton.clicked.connect(lambda: self.zoom(1.0/1.5))
+        self.prevPageButton.clicked.connect(lambda: self.setCurrent(relPage=-1))
+        self.nextPageButton.clicked.connect(lambda: self.setCurrent(relPage=1))
+        self.prevCardButton.clicked.connect(lambda: self.setCurrent(relCard=-1))
+        self.nextCardButton.clicked.connect(lambda: self.setCurrent(relCard=1))
+        for widget in [
+            self.inputCardWidth, self.inputCardHeight,
+            self.inputRows, self.inputColumns,
+            self.shiftHor, self.shiftVert,
+            self.inputInnerWidth, self.inputInnerHeight,
+        ]:
+            widget.valueChanged.connect(self.updateCard)
         self.showFullPageCB.toggled.connect(self.toggleFullPage)
         if filename:
             self.openFile(filename)
 
+    def setCurrent(self, page=None, card=None, relPage=None, relCard=None):
+        cp = self.currentPage
+        cc = self.currentCard
+        cardCount = self.inputRows.value() * self.inputColumns.value()
+        if page is not None:
+            self.currentPage = page
+        if card is not None:
+            self.currentCard = card
+        if relPage is not None:
+            self.currentPage = (self.currentPage + relPage) % self.pageCount
+        if relCard is not None:
+            self.currentCard = (self.currentCard + relCard) % cardCount
+        self.currentDisplay.setText(
+            "{0}/{1} - {2}/{3}".format(self.currentPage + 1, self.pageCount,
+                                       self.currentCard + 1, cardCount)
+        )
+        if self.currentPage != cp or self.currentCard != cc:
+            self.updateCard()
+
     def toggleFullPage(self):
         if self.showFullPageCB.isChecked():
-            self.showPixmap('page0', self.showFullPage, page=0)
+            self.showPixmap('page{0}'.format(self.currentPage), self.showFullPage,
+                            page=self.currentPage)
         else:
-            self.showPixmap('page0card0', self.showCard, page=0, card=0)
+            self.showPixmap('page{0}card{1}'.format(self.currentPage, self.currentCard),
+                            self.showCard, page=self.currentPage, card=self.currentCard)
+
+    def updateCard(self):
+        self.showPixmap('page{0}card{1}'.format(self.currentPage, self.currentCard),
+                        self.showCard, page=self.currentPage, card=self.currentCard,
+                        force=True)
 
     def fn1(self):
         self.graphicsView.rotate(90)
@@ -82,51 +123,67 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.openFile(filename)
 
     def openFile(self, filename):
+        self._image_cache = {}
         with Image(filename=filename, resolution=WORK_RESOLUTION) as img:
+            self.pageCount = len(img.sequence)
+            self._center = [s/2 for s in img.size]
+            print(self._center)
             self._image = img.make_blob()
-            self.showPixmap('page0card0', self.showCard, page=0, card=0)
+            self.setCurrent(page=0, card=0)
+            self.updateCard()
 
     def clearScene(self):
         for i in self._scene.items():
             self._scene.removeItem(i)
 
-    def showPixmap(self, ident, fn, *args, **kwargs):
-        if ident not in self._image_cache:
+    def getPixmap(self, ident, fn, force=False, *args, **kwargs):
+        if ident not in self._image_cache or force:
             self._image_cache[ident] = fn(*args, **kwargs)
+        return self._image_cache[ident]
+
+    def showPixmap(self, *args, **kwargs):
         self.clearScene()
-        self._scene.addPixmap(self._image_cache[ident])
+        self._scene.addPixmap(self.getPixmap(*args, **kwargs))
 
     def showFullPage(self, page=0):
-        with Image(blob=self._image) as img:
-            page = img.sequence[0:1]
+        with Image(blob=self._image, resolution=WORK_RESOLUTION) as img:
+            page = Image(img.sequence[page], resolution=WORK_RESOLUTION)
             xpm = page.make_blob(format='xpm')
             pix = QtGui.QPixmap()
             pix.loadFromData(xpm)
             return pix
 
     def showCard(self, page=0, card=0):
-        with Image(blob=self._image) as img:
-            npages = len(img.sequence)
-            page = img.sequence[0]
-            rownum = card // self.inputColumns.value()
-            colnum = card % self.inputColumns.value()
-            left = self.inputOuterLeft.value() + colnum * (self.inputCardWidth.value() + self.inputInnerWidth.value())
-            right = left + self.inputCardWidth.value()
-            top = self.inputOuterTop.value() + rownum * (self.inputCardHeight.value() + self.inputInnerHeight.value())
-            bottom = top + self.inputCardHeight.value()
-            print('rownum',rownum,'colnum',colnum,'left',left,'right',right,'top',top,'bottom',bottom)
-            with page[left:right, top:bottom] as cardimg:
-                xpm = cardimg.make_blob(format='xpm')
-                pix = QtGui.QPixmap()
-                pix.loadFromData(xpm)
-                return pix
+        fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
+        rownum = card // self.inputColumns.value()
+        colnum = card % self.inputColumns.value()
+        # TODO : handle even number of rows or columns
+        middle_row = self.inputColumns.value() // 2
+        middle_col = self.inputRows.value() // 2
+        left = (
+            self._center[0] - self.shiftHor.value() +
+            (colnum - middle_col) * self.inputCardWidth.value() -
+            self.inputCardWidth.value() / 2 +
+            self.inputInnerWidth.value() / 2
+        )
+        top = (
+            self._center[1] - self.shiftVert.value() +
+            (rownum - middle_row) * self.inputCardHeight.value() -
+            self.inputCardHeight.value() / 2 +
+            self.inputInnerHeight.value() / 2
+        )
+        return fullpage.copy(
+            left, top,
+            self.inputCardWidth.value() - self.inputInnerWidth.value(),
+            self.inputCardHeight.value() - self.inputInnerHeight.value(),
+        )
 
 
 if __name__ == '__main__':
 
     app = QtWidgets.QApplication(sys.argv)
 
-    yack = Yack(filename=sys.argv[1] if len(sys.argv) > 0 else None)
+    yack = Yack(filename=sys.argv[1] if len(sys.argv) > 1 else None)
     yack.show()
 
     sys.exit(app.exec_())
