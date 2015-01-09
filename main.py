@@ -3,6 +3,7 @@
 import sys
 import pdb
 import os
+import time
 
 # QT
 from PyQt5.QtCore import Qt
@@ -29,14 +30,12 @@ def unit_convert(unit=1.0, base_resolution=300, work_resolution=300):
 
 px = unit_convert(work_resolution=WORK_RESOLUTION)
     
-CARDW = px(736)
-CARDH = px(1030)
-MTOP = px(95)
-MLEFT = px(161)
+CARDW = px(750)
+CARDH = px(1050)
 TILEW = 3
 TILEH = 3
-INNW = px(10)
-INNH = px(10)
+INNW = px(0)
+INNH = px(0)
 
 class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, filename=None):
@@ -60,6 +59,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.inputInnerWidth.setValue(INNW)
         self.inputInnerHeight.setValue(INNH)
         self.actionOpen.triggered.connect(self.chooseFile)
+        self.actionSaveCards.triggered.connect(self.exportCards)
         self.rotateButton.clicked.connect(self.fn1)
         self.zoomInButton.clicked.connect(lambda: self.zoom(1.5))
         self.zoomOutButton.clicked.connect(lambda: self.zoom(1.0/1.5))
@@ -98,6 +98,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.updateCard()
 
     def toggleFullPage(self):
+        if self._image is None:
+            return
         if self.showFullPageCB.isChecked():
             self.showPixmap('page{0}'.format(self.currentPage), self.showFullPage,
                             page=self.currentPage)
@@ -130,7 +132,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             print(self._center)
             self._image = img.make_blob()
             self.setCurrent(page=0, card=0)
-            self.updateCard()
+            self.toggleFullPage()
 
     def clearScene(self):
         for i in self._scene.items():
@@ -153,8 +155,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             pix.loadFromData(xpm)
             return pix
 
-    def showCard(self, page=0, card=0):
-        fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
+    def getCropCoords(self, card=0):
         rownum = card // self.inputColumns.value()
         colnum = card % self.inputColumns.value()
         # TODO : handle even number of rows or columns
@@ -172,11 +173,32 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.inputCardHeight.value() / 2 +
             self.inputInnerHeight.value() / 2
         )
-        return fullpage.copy(
-            left, top,
-            self.inputCardWidth.value() - self.inputInnerWidth.value(),
-            self.inputCardHeight.value() - self.inputInnerHeight.value(),
-        )
+        width = self.inputCardWidth.value() - self.inputInnerWidth.value()
+        height = self.inputCardHeight.value() - self.inputInnerHeight.value()
+        return map(int, [left, top, width, height])
+
+    def showCard(self, page=0, card=0):
+        fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
+        left, top, width, height = self.getCropCoords(card)
+        return fullpage.copy(left, top, width, height)
+
+    def exportCards(self):
+        pages = range(self.pageCount)
+        ncards = self.inputColumns.value() * self.inputRows.value()
+        total_cards = len(pages) * ncards
+        current_card = 0
+        self.statusbar.showMessage("Exporting...")
+        with Image(blob=self._image, resolution=WORK_RESOLUTION) as img:
+            for p in pages:
+                page = img.sequence[p]
+                for c in range(ncards):
+                    self.statusbar.showMessage(
+                        "Exporting... page {0}, card {1}".format(p + 1, c + 1))
+                    left, top, width, height = self.getCropCoords(c)
+                    time.sleep(0.250)
+                    with page[left:left+width, top:top+height] as card:
+                        card.save(filename='page{0}card{1}.png'.format(p, c))
+        self.statusbar.showMessage("Export done.", 1500)
 
 
 if __name__ == '__main__':

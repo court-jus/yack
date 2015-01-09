@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Thu Jan  8 23:26:04 2015
+# Created: Fri Jan  9 21:45:38 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -22,6 +22,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.showFullPageCB = QtWidgets.QCheckBox(self.centralwidget)
+        self.showFullPageCB.setChecked(True)
         self.showFullPageCB.setObjectName("showFullPageCB")
         self.horizontalLayout.addWidget(self.showFullPageCB)
         self.currentDisplay = QtWidgets.QLabel(self.centralwidget)
@@ -79,7 +80,7 @@ class Ui_MainWindow(object):
         self.toolBox.setSizePolicy(sizePolicy)
         self.toolBox.setObjectName("toolBox")
         self.page1 = QtWidgets.QWidget()
-        self.page1.setGeometry(QtCore.QRect(0, 0, 192, 596))
+        self.page1.setGeometry(QtCore.QRect(0, 0, 192, 609))
         self.page1.setObjectName("page1")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.page1)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -188,7 +189,11 @@ class Ui_MainWindow(object):
         self.actionExit.setObjectName("actionExit")
         self.actionOpen = QtWidgets.QAction(MainWindow)
         self.actionOpen.setObjectName("actionOpen")
+        self.actionSaveCards = QtWidgets.QAction(MainWindow)
+        self.actionSaveCards.setObjectName("actionSaveCards")
         self.menuTest.addAction(self.actionOpen)
+        self.menuTest.addSeparator()
+        self.menuTest.addAction(self.actionSaveCards)
         self.menuTest.addSeparator()
         self.menuTest.addAction(self.actionExit)
         self.menubar.addAction(self.menuTest.menuAction())
@@ -223,4 +228,6 @@ class Ui_MainWindow(object):
         self.menuTest.setTitle(_translate("MainWindow", "File"))
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionOpen.setText(_translate("MainWindow", "Open..."))
+        self.actionSaveCards.setText(_translate("MainWindow", "Save cards..."))
+        self.actionSaveCards.setToolTip(_translate("MainWindow", "Save each card as a separate file (for POD services)"))
 
