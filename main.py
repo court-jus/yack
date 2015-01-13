@@ -58,13 +58,28 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.saveOutputLayoutButton.clicked.connect(lambda: self.saveLayout('output'))
         for widget in [
             self.inputCardWidth, self.inputCardHeight,
+            self.inputShiftHor, self.inputShiftVert,
+            self.inputInnerWidth, self.inputInnerHeight,
+            self.outputCardWidth, self.outputCardHeight,
+            self.outputShiftHor, self.outputShiftVert,
+            self.outputInnerWidth, self.outputInnerHeight,
+        ]:
+            if WORK_RESOLUTION != 300:
+                widget.setValue(int(widget.value() * WORK_RESOLUTION / 300))
+        for widget in [
+            self.inputCardWidth, self.inputCardHeight,
             self.inputRows, self.inputColumns,
             self.inputShiftHor, self.inputShiftVert,
             self.inputInnerWidth, self.inputInnerHeight,
         ]:
-            if WORK_RESOLUTION != 300:
-                widget.setValue(int(widget.value() * WORK_RESOLUTION / 300))
             widget.valueChanged.connect(self.updateCard)
+        for widget in [
+            self.outputCardWidth, self.outputCardHeight,
+            self.outputRows, self.outputColumns,
+            self.outputShiftHor, self.outputShiftVert,
+            self.outputInnerWidth, self.outputInnerHeight,
+        ]:
+            widget.valueChanged.connect(lambda v: self.showOutputPage())
         if filename:
             self.openFile(filename)
 
@@ -104,11 +119,13 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             'page{0}card{1}'.format(self.currentPage, self.currentCard),
             self.showCard, page=self.currentPage, card=self.currentCard,
             force=True)
+        self.showOutputPage()
 
     def updateCard(self):
         self.showPixmap(self.cardScene, 'page{0}card{1}'.format(self.currentPage, self.currentCard),
                         self.showCard, page=self.currentPage, card=self.currentCard,
                         force=True)
+        self.showOutputPage()
 
     def clearScene(self, scene):
         for i in scene.items():
@@ -125,11 +142,51 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def showFullPage(self, page=0):
         with Image(blob=self._image, resolution=WORK_RESOLUTION) as img:
+            if page >= len(img.sequence):
+                return QtGui.QPixmap()
             page = Image(img.sequence[page], resolution=WORK_RESOLUTION)
             xpm = page.make_blob(format='xpm')
             pix = QtGui.QPixmap()
             pix.loadFromData(xpm)
             return pix
+
+    def showOutputPage(self, page=0):
+        self.clearScene(self.outputScene)
+        oR = self.outputRows.value()
+        oC = self.outputColumns.value()
+        oCW = self.outputCardWidth.value()
+        oCH = self.outputCardHeight.value()
+        oIW = self.outputInnerWidth.value()
+        oIH = self.outputInnerHeight.value()
+        oSH = self.outputShiftHor.value()
+        oSV = self.outputShiftVert.value()
+        ncards = oC * oR
+        nincards = self.inputColumns.value() * self.inputRows.value()
+        firstcard = page * ncards
+        pageWidth = 2480 * WORK_RESOLUTION / 300
+        pageHeight = 3508 * WORK_RESOLUTION / 300
+        allCardsWidth = oC * oCW + oC * oIW + oIW
+        allCardsHeight = oR * oCH + oR * oIH + oIH
+        mL = (pageWidth - allCardsWidth) / 2
+        mT = (pageHeight - allCardsHeight) / 2
+        self.outputScene.addRect(0, 0, pageWidth, pageHeight)
+        brush = QtGui.QBrush(QtGui.QColor(self.outputInnerColor.text()))
+        pen = QtGui.QPen(QtGui.QColor('#ffffff'))
+        self.outputScene.addRect(mL, mT, allCardsWidth, allCardsHeight, pen=pen, brush=brush)
+        for cardnumber in range(ncards):
+            cardidx = cardnumber + firstcard
+            inpage = cardidx // nincards
+            incard = cardidx % nincards
+            pix = self.showCard(page=inpage, card=incard)
+            if pix:
+                pix = pix.scaled(oCW, oCH)
+                item = self.outputScene.addPixmap(pix)
+                row = cardnumber // oC
+                col = cardnumber % oC
+                item.setPos(
+                    col * (oCW + oIW) + oSH + mL + oIW,
+                    row * (oCH + oIH) + oSV + mT + oIH,
+                )
 
     def showCard(self, page=0, card=0):
         fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
