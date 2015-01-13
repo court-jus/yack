@@ -108,7 +108,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.showPixmap(
                 self.cardScene,
                 'page{0}card{1}'.format(self.currentPage, self.currentCard),
-                self.showCard, page=self.currentPage, card=self.currentCard)
+                self.showCard, page=self.currentPage, card=self.currentCard,
+                force=True)
 
     def updateAll(self):
         self.showPixmap(
