@@ -396,7 +396,6 @@
        <zorder>groupBox_3</zorder>
        <zorder>groupBox_2</zorder>
        <zorder>groupBox_4</zorder>
-       <zorder>horizontalLayoutWidget</zorder>
       </widget>
       <widget class="QWidget" name="page2">
        <property name="geometry">
@@ -662,6 +661,7 @@
     </property>
     <addaction name="actionOpen"/>
     <addaction name="separator"/>
+    <addaction name="actionSaveOutput"/>
     <addaction name="actionSaveCards"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
@@ -685,6 +685,11 @@
    </property>
    <property name="toolTip">
     <string>Save each card as a separate file (for POD services)</string>
+   </property>
+  </action>
+  <action name="actionSaveOutput">
+   <property name="text">
+    <string>Save output</string>
    </property>
   </action>
  </widget>

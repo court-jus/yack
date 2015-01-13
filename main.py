@@ -13,11 +13,15 @@ from PyQt5 import QtWidgets, QtGui
 
 # Image manipulation
 from wand.image import Image
+from wand.drawing import Drawing
+from wand.color import Color
 
 # YACK
 from ui.main_ui import Ui_MainWindow
 
 WORK_RESOLUTION = 50
+PWIDTH = 2480
+PHEIGHT = 3508
 
 class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, filename=None):
@@ -40,6 +44,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.actionExit.triggered.connect(self.close)
         self.actionOpen.triggered.connect(self.chooseFile)
         self.actionSaveCards.triggered.connect(self.exportCards)
+        self.actionSaveOutput.triggered.connect(self.exportOutput)
         # Top buttons
         self.rotateButton.clicked.connect(self.rotate)
         self.zoomInButton.clicked.connect(lambda: self.zoom(1.5))
@@ -164,8 +169,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         ncards = oC * oR
         nincards = self.inputColumns.value() * self.inputRows.value()
         firstcard = page * ncards
-        pageWidth = 2480 * WORK_RESOLUTION / 300
-        pageHeight = 3508 * WORK_RESOLUTION / 300
+        pageWidth = PWIDTH * WORK_RESOLUTION / 300
+        pageHeight = PHEIGHT * WORK_RESOLUTION / 300
         allCardsWidth = oC * oCW + oC * oIW + oIW
         allCardsHeight = oR * oCH + oR * oIH + oIH
         mL = (pageWidth - allCardsWidth) / 2
@@ -237,6 +242,60 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                     time.sleep(0.250)
                     with page[left:left+width, top:top+height] as card:
                         card.save(filename='page{0}card{1}.png'.format(p, c))
+        self.statusbar.showMessage("Export done.", 1500)
+
+    def exportOutput(self):
+        self.statusbar.showMessage("Exporting...")
+        oR = self.outputRows.value()
+        oC = self.outputColumns.value()
+        oCW = self.outputCardWidth.value()
+        oCH = self.outputCardHeight.value()
+        oIW = self.outputInnerWidth.value()
+        oIH = self.outputInnerHeight.value()
+        oSH = self.outputShiftHor.value()
+        oSV = self.outputShiftVert.value()
+        ncards = oC * oR
+        nincards = self.inputColumns.value() * self.inputRows.value()
+        pageWidth = int(PWIDTH * WORK_RESOLUTION / 300)
+        pageHeight = int(PHEIGHT * WORK_RESOLUTION / 300)
+        allCardsWidth = oC * oCW + oC * oIW + oIW
+        allCardsHeight = oR * oCH + oR * oIH + oIH
+        mL = int((pageWidth - allCardsWidth) / 2)
+        mT = int((pageHeight - allCardsHeight) / 2)
+        totalInputCards = nincards * self.pageCount
+        totalOutputPages = totalInputCards // ncards + (1 if totalInputCards % ncards > 0 else 0)
+        draw = Drawing()
+        draw.fill_color = Color(self.outputInnerColor.text())
+        draw.rectangle(left=mL, top=mT, width=allCardsWidth, height=allCardsHeight)
+        with Image(width=pageWidth, height=pageHeight) as outputImage:
+            for oPageNum in range(totalOutputPages):
+                firstcard = oPageNum * ncards
+                page = Image(width=pageWidth, height=pageHeight)
+                draw(page)
+                img = Image(blob=self._image, resolution=WORK_RESOLUTION)
+                for cardnumber in range(ncards):
+                    self.statusbar.showMessage("Exporting... {0} {1}".format(oPageNum, cardnumber))
+                    cardidx = cardnumber + firstcard
+                    inpage = cardidx // nincards
+                    incard = cardidx % nincards
+                    inputpage = Image(img.sequence[inpage], resolution=WORK_RESOLUTION)
+                    l, t, w, h = self.getCropCoords(card=incard)
+                    inputcard = inputpage[l:l+w, t:t+h]
+                    # scale to output
+                    inputcard.resize(width=oCW, height=oCH)
+                    row = cardnumber // oC
+                    col = cardnumber % oC
+                    page.composite(
+                        inputcard,
+                        int(col * (oCW + oIW) + oSH + mL + oIW),
+                        int(row * (oCH + oIH) + oSV + mT + oIH),
+                    )
+                    inputcard.close()
+                outputImage.sequence.append(page)
+                page.close()
+            del outputImage.sequence[0]
+            outputImage.save(filename='output.pdf')
+
         self.statusbar.showMessage("Export done.", 1500)
 
     def openLayout(self, layout='input'):

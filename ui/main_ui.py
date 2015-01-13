@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Fri Jan  9 22:50:53 2015
+# Created: Wed Jan 14 00:31:07 2015
 #      by: PyQt5 UI code generator 5.2.1
 #
 # WARNING! All changes made in this file will be lost!
@@ -346,8 +346,11 @@ class Ui_MainWindow(object):
         self.actionOpen.setObjectName("actionOpen")
         self.actionSaveCards = QtWidgets.QAction(MainWindow)
         self.actionSaveCards.setObjectName("actionSaveCards")
+        self.actionSaveOutput = QtWidgets.QAction(MainWindow)
+        self.actionSaveOutput.setObjectName("actionSaveOutput")
         self.menuTest.addAction(self.actionOpen)
         self.menuTest.addSeparator()
+        self.menuTest.addAction(self.actionSaveOutput)
         self.menuTest.addAction(self.actionSaveCards)
         self.menuTest.addSeparator()
         self.menuTest.addAction(self.actionExit)
@@ -411,4 +414,5 @@ class Ui_MainWindow(object):
         self.actionOpen.setText(_translate("MainWindow", "Open..."))
         self.actionSaveCards.setText(_translate("MainWindow", "Save cards..."))
         self.actionSaveCards.setToolTip(_translate("MainWindow", "Save each card as a separate file (for POD services)"))
+        self.actionSaveOutput.setText(_translate("MainWindow", "Save output"))
 
