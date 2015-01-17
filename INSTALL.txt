@@ -6,30 +6,30 @@ I'm starting from a fresh Windows 7 installation.
 Python environment
 ==================
 
-- Je télécharge python depuis https://www.python.org/downloads/windows/ (rubrique "Latest Python 3 Release"). Lien direct : https://www.python.org/ftp/python/3.4.2/python-3.4.2.msi mais vous pouvez prendre une version plus récente.
-- Au moment de l'installation je choisis "Install for all users" (mais je ne suis pas sûr que ce soit indispensable)
-- Je télécharge pywin32 depuis http://sourceforge.net/projects/pywin32/files/pywin32/. Lien direct : http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py3.4.exe/download
-- Quand je l'installe il détecte automatiquement le dossier de Python mais si vous avez changé ce dossier lors de l'install de python, il faut peut-être vérifier
+- I download python from https://www.python.org/downloads/windows/ (section "Latest Python 3 Release"). Direct link : https://www.python.org/ftp/python/3.4.2/python-3.4.2.msi but you can take a more recent version
+- During the installation, I choose "Install for all users" (but I'm not sure this is mandatory)
+- I download pywin32 from http://sourceforge.net/projects/pywin32/files/pywin32/. Direct link : http://sourceforge.net/projects/pywin32/files/pywin32/Build%20219/pywin32-219.win32-py3.4.exe/download
+- When I install it, it detects python folder but if you changed that during the first steps, you may have to check
 
 ImageMagick and its Python binding
 ==================================
 
-- Je télécharge ImageMagick depuis http://www.imagemagick.org/download/binaries Lien direct : http://www.imagemagick.org/download/binaries/ImageMagick-i686-pc-windows.exe
-- Au moment de l'installation, je coche "Install development headers and libraries for C and C++"
-- J'ouvre un terminal (Démarrer/Exécuter 'cmd')
-- Je vais dans le dossier de scripts de python (cd \Python34\Scripts)
-- J'installe wand : pip.exe install wand
+- I download ImageMagick from http://www.imagemagick.org/download/binaries Direct link : http://www.imagemagick.org/download/binaries/ImageMagick-i686-pc-windows.exe
+- During installation, I check "Install development headers and libraries for C and C++"
+- I open a terminal (Start menu/Run 'cmd')
+- I go into python's scripts folder (cd \Python34\Scripts)
+- I install wand : pip.exe install wand
 
 PyQT5
 =====
 
-- Je télécharge PyQT5 depuis http://www.riverbankcomputing.com/software/pyqt/download5 (http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.4/PyQt5-5.4-gpl-Py3.4-Qt5.4.0-x32.exe)
-- Quand je l'installe il détecte automatiquement le dossier de Python mais si vous avez changé ce dossier lors de l'install de python, il faut peut-être vérifier
+- I download PyQT5 from http://www.riverbankcomputing.com/software/pyqt/download5 (http://sourceforge.net/projects/pyqt/files/PyQt5/PyQt-5.4/PyQt5-5.4-gpl-Py3.4-Qt5.4.0-x32.exe)
+- When I install it, the python folder is dectected but again, if you changed it, you may have to check
 
 YACK
 ====
 
-- Depuis https://github.com/court-jus/yack cliquer sur "Download ZIP". Lien direct : https://github.com/court-jus/yack/archive/master.zip
-- Je le décompresse sur le bureau
-- Je le lance en double-cliquant sur "main.py" dans son dossier
+- From https://github.com/court-jus/yack clic on "Download ZIP". Direct link : https://github.com/court-jus/yack/archive/master.zip
+- I unzip it on the desktop
+- I launch it with a double-clic on "main.py"
 
