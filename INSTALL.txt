@@ -20,6 +20,13 @@ ImageMagick and its Python binding
 - I go into python's scripts folder (cd \Python34\Scripts)
 - I install wand : pip.exe install wand
 
+Ghostscript (to allow ImageMagick to open PDF files)
+====================================================
+
+- Download ghostscript from http://www.ghostscript.com/download/gsdnld.html (Direct link : http://downloads.ghostscript.com/public/gs915w32.exe)
+- Install it
+- Optional : you can try to open a PDF file in ImageMagick display to check if it works
+
 PyQT5
 =====
 
