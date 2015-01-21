@@ -373,19 +373,20 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def getCropCoords(self, card=0):
         rownum = card // self.inputColumns.value()
         colnum = card % self.inputColumns.value()
-        # TODO : handle even number of rows or columns
-        middle_row = self.inputColumns.value() // 2
-        middle_col = self.inputRows.value() // 2
+        ic = self.inputColumns.value()
+        ir = self.inputRows.value()
+        middle_row = ir / 2
+        middle_col = ic / 2
         left = (
             self._center[0] - self.inputShiftHor.value() +
             (colnum - middle_col) * self.inputCardWidth.value() -
-            self.inputCardWidth.value() / 2 +
+            (self.inputCardWidth.value() / 2) * (ic % 2 > 0) +
             self.inputInnerWidth.value() / 2
         )
         top = (
             self._center[1] - self.inputShiftVert.value() +
             (rownum - middle_row) * self.inputCardHeight.value() -
-            self.inputCardHeight.value() / 2 +
+            (self.inputCardHeight.value() / 2) * (ir % 2 > 0) +
             self.inputInnerHeight.value() / 2
         )
         width = self.inputCardWidth.value() - self.inputInnerWidth.value()
