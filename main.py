@@ -34,7 +34,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self._image_cache = {}
         self._center = [0, 0]
         self.currentPage = 0
-        self.pageCount = 1
+        self.currentPageIdx = 0
+        self.activePages = [0]
         self.currentCard = 4
         self.inputGView.setScene(self.inputScene)
         self.cardGView.setScene(self.cardScene)
@@ -85,24 +86,49 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.outputInnerWidth, self.outputInnerHeight,
         ]:
             widget.valueChanged.connect(lambda v: self.showOutputPage())
+        self.inputIgnoredPages.textEdited.connect(lambda v: self.computeIgnoredPages())
         if filename:
             self.openFile(filename)
 
     # Choose and update current
+    def computeIgnoredPages(self):
+        ignored = []
+        self.activePages = self.allPages[:]
+        try:
+            for i in self.inputIgnoredPages.text().split(','):
+                if '-' in i:
+                    start, end = map(int, i.split('-'))
+                    if end < start:
+                        start, end = end, start
+                else:
+                    start, end = map(int, [i, i])
+                while start <= end:
+                    ignored.append(start - 1)
+                    start += 1
+            for i in ignored:
+                self.activePages.remove(i)
+            self.setCurrent(page=0)
+        except:
+            traceback.print_exc()
+            self.statusbar.showMessage("Error: can't understand your ignored pages input.", 1500)
+
     def setCurrent(self, page=None, card=None, relPage=None, relCard=None):
         cp = self.currentPage
         cc = self.currentCard
         cardCount = self.inputRows.value() * self.inputColumns.value()
         if page is not None:
-            self.currentPage = page
+            if page in self.activePages:
+                self.currentPage = page
         if card is not None:
             self.currentCard = card
         if relPage is not None:
-            self.currentPage = (self.currentPage + relPage) % self.pageCount
+            self.currentPageIdx = (self.currentPageIdx + relPage) % len(self.activePages)
+            self.currentPage = self.activePages[self.currentPageIdx]
         if relCard is not None:
             self.currentCard = (self.currentCard + relCard) % cardCount
         self.currentDisplay.setText(
-            "{0}/{1} - {2}/{3}".format(self.currentPage + 1, self.pageCount,
+            "{0}/{1} ({2}) - {2}/{3}".format(self.currentPageIdx + 1, len(self.activePages),
+                                       self.currentPage + 1,
                                        self.currentCard + 1, cardCount)
         )
         if self.currentPage != cp:
@@ -220,14 +246,15 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def openFile(self, filename):
         self._image_cache = {}
         with Image(filename=filename, resolution=WORK_RESOLUTION) as img:
-            self.pageCount = len(img.sequence)
+            self.allPages = list(range(len(img.sequence)))
+            self.activePages = self.allPages[:]
             self._center = [s/2 for s in img.size]
             self._image = img.make_blob()
             self.setCurrent(page=0, card=0)
             self.updateAll()
 
     def exportCards(self):
-        pages = range(self.pageCount)
+        pages = self.activePages
         ncards = self.inputColumns.value() * self.inputRows.value()
         total_cards = len(pages) * ncards
         current_card = 0
@@ -262,7 +289,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         allCardsHeight = oR * oCH + oR * oIH + oIH
         mL = int((pageWidth - allCardsWidth) / 2)
         mT = int((pageHeight - allCardsHeight) / 2)
-        totalInputCards = nincards * self.pageCount
+        totalInputCards = nincards * len(self.activePages)
         totalOutputPages = totalInputCards // ncards + (1 if totalInputCards % ncards > 0 else 0)
         draw = Drawing()
         draw.fill_color = Color(self.outputInnerColor.text())
@@ -276,7 +303,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 for cardnumber in range(ncards):
                     self.statusbar.showMessage("Exporting... {0} {1}".format(oPageNum, cardnumber))
                     cardidx = cardnumber + firstcard
-                    inpage = cardidx // nincards
+                    inpage = self.activePages[cardidx // nincards]
                     incard = cardidx % nincards
                     inputpage = Image(img.sequence[inpage], resolution=WORK_RESOLUTION)
                     l, t, w, h = self.getCropCoords(card=incard)

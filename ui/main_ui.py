@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Wed Jan 14 00:31:07 2015
-#      by: PyQt5 UI code generator 5.2.1
+# Created: Wed Jan 21 12:55:28 2015
+#      by: PyQt5 UI code generator 5.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -110,10 +110,27 @@ class Ui_MainWindow(object):
         self.toolBox.setMinimumSize(QtCore.QSize(296, 0))
         self.toolBox.setObjectName("toolBox")
         self.page1 = QtWidgets.QWidget()
-        self.page1.setGeometry(QtCore.QRect(0, 0, 296, 609))
+        self.page1.setGeometry(QtCore.QRect(0, 0, 296, 621))
         self.page1.setObjectName("page1")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.page1)
         self.verticalLayout.setObjectName("verticalLayout")
+        self.groupBox_9 = QtWidgets.QGroupBox(self.page1)
+        self.groupBox_9.setObjectName("groupBox_9")
+        self.formLayout_9 = QtWidgets.QFormLayout(self.groupBox_9)
+        self.formLayout_9.setObjectName("formLayout_9")
+        self.inputIgnoredPages = QtWidgets.QLineEdit(self.groupBox_9)
+        self.inputIgnoredPages.setObjectName("inputIgnoredPages")
+        self.formLayout_9.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.inputIgnoredPages)
+        self.label_21 = QtWidgets.QLabel(self.groupBox_9)
+        self.label_21.setObjectName("label_21")
+        self.formLayout_9.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.label_21)
+        self.lineEdit_2 = QtWidgets.QLineEdit(self.groupBox_9)
+        self.lineEdit_2.setObjectName("lineEdit_2")
+        self.formLayout_9.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.lineEdit_2)
+        self.label_23 = QtWidgets.QLabel(self.groupBox_9)
+        self.label_23.setObjectName("label_23")
+        self.formLayout_9.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_23)
+        self.verticalLayout.addWidget(self.groupBox_9)
         self.groupBox = QtWidgets.QGroupBox(self.page1)
         self.groupBox.setObjectName("groupBox")
         self.formLayout = QtWidgets.QFormLayout(self.groupBox)
@@ -213,7 +230,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.verticalLayout_7)
         self.toolBox.addItem(self.page1, "")
         self.page2 = QtWidgets.QWidget()
-        self.page2.setGeometry(QtCore.QRect(0, 0, 296, 609))
+        self.page2.setGeometry(QtCore.QRect(0, 0, 296, 621))
         self.page2.setObjectName("page2")
         self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.page2)
         self.verticalLayout_8.setObjectName("verticalLayout_8")
@@ -332,7 +349,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.toolBox)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1059, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1059, 19))
         self.menubar.setObjectName("menubar")
         self.menuTest = QtWidgets.QMenu(self.menubar)
         self.menuTest.setObjectName("menuTest")
@@ -375,6 +392,9 @@ class Ui_MainWindow(object):
         self.c.setTabText(self.c.indexOf(self.tab_2), _translate("MainWindow", "Card"))
         self.label_19.setText(_translate("MainWindow", "This displays how the output will look like"))
         self.c.setTabText(self.c.indexOf(self.tab_3), _translate("MainWindow", "Output"))
+        self.groupBox_9.setTitle(_translate("MainWindow", "Pages"))
+        self.label_21.setText(_translate("MainWindow", "Ignored"))
+        self.label_23.setText(_translate("MainWindow", "..."))
         self.groupBox.setTitle(_translate("MainWindow", "Cards"))
         self.label.setText(_translate("MainWindow", "Width"))
         self.label_2.setText(_translate("MainWindow", "Height"))
