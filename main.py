@@ -76,6 +76,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.inputInnerWidth, self.inputInnerHeight,
         ]:
             widget.valueChanged.connect(self.updateCard)
+            widget.valueChanged.connect(self.showInputPage)
         for widget in [
             self.outputCardWidth, self.outputCardHeight,
             self.outputRows, self.outputColumns,
@@ -84,6 +85,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.outputPageWidth, self.outputPageHeight,
         ]:
             widget.valueChanged.connect(lambda v: self.showOutputPage())
+        self.showGuides.stateChanged.connect(lambda v: self.showInputPage())
         self.inputIgnoredPages.textEdited.connect(lambda v: self.computeIgnoredPages())
         self.applyResolutionBtn.clicked.connect(lambda v: self.changeResolution())
         if self.filename:
@@ -131,9 +133,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                                        self.currentCard + 1, cardCount)
         )
         if self.currentPage != cp:
-            self.showPixmap(
-                self.inputScene, 'page{0}'.format(self.currentPage),
-                self.showFullPage, page=self.currentPage)
+            self.showInputPage(page=self.currentPage)
         if self.currentPage != cp or self.currentCard != cc:
             self.showPixmap(
                 self.cardScene,
@@ -146,9 +146,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.openFile(self.filename)
 
     def updateAll(self):
-        self.showPixmap(
-            self.inputScene, 'page{0}'.format(self.currentPage),
-            self.showFullPage, page=self.currentPage, force=True)
+        self.showInputPage(page=self.currentPage, force=True)
         self.showPixmap(
             self.cardScene,
             'page{0}card{1}'.format(self.currentPage, self.currentCard),
@@ -184,6 +182,23 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             pix = QtGui.QPixmap()
             pix.loadFromData(xpm)
             return pix
+
+    def showInputPage(self, page=0, force=False):
+        self.clearScene(self.inputScene)
+        pix = self.getPixmap(
+            'page{0}'.format(self.currentPage),
+            self.showFullPage, page=page, force=force)
+        pageWidth = self._center[0] * 2
+        pageHeight = self._center[1] * 2
+        self.inputScene.addPixmap(pix)
+        shiftedh = self._center[0] - self.inputShiftHor.value()
+        shiftedv = self._center[1] - self.inputShiftVert.value()
+        if self.showGuides.isChecked():
+            self.inputScene.addRect(0, 0, pageWidth, pageHeight)
+            brush = QtGui.QBrush(QtGui.QColor('#ff0000'))
+            pen = QtGui.QPen(QtGui.QColor('#ff0000'))
+            self.inputScene.addRect(shiftedh-1, shiftedv-10, 2, 20, pen=pen, brush=brush)
+            self.inputScene.addRect(shiftedh-10, shiftedv-1, 20, 2, pen=pen, brush=brush)
 
     def showOutputPage(self, page=0):
         self.clearScene(self.outputScene)

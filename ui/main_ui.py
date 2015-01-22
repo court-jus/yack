@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Thu Jan 22 12:57:03 2015
+# Created: Thu Jan 22 13:58:57 2015
 #      by: PyQt5 UI code generator 5.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -118,6 +118,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_15 = QtWidgets.QVBoxLayout(self.groupBox_19)
         self.verticalLayout_15.setObjectName("verticalLayout_15")
         self.formLayout_20 = QtWidgets.QFormLayout()
+        self.formLayout_20.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
         self.formLayout_20.setObjectName("formLayout_20")
         self.workResolution = QtWidgets.QSpinBox(self.groupBox_19)
         self.workResolution.setMaximum(9999)
@@ -127,6 +128,15 @@ class Ui_MainWindow(object):
         self.label_46 = QtWidgets.QLabel(self.groupBox_19)
         self.label_46.setObjectName("label_46")
         self.formLayout_20.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.label_46)
+        self.showGuides = QtWidgets.QCheckBox(self.groupBox_19)
+        self.showGuides.setText("")
+        self.showGuides.setCheckable(True)
+        self.showGuides.setChecked(True)
+        self.showGuides.setObjectName("showGuides")
+        self.formLayout_20.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.showGuides)
+        self.label_44 = QtWidgets.QLabel(self.groupBox_19)
+        self.label_44.setObjectName("label_44")
+        self.formLayout_20.setWidget(1, QtWidgets.QFormLayout.FieldRole, self.label_44)
         self.verticalLayout_15.addLayout(self.formLayout_20)
         self.applyResolutionBtn = QtWidgets.QPushButton(self.groupBox_19)
         self.applyResolutionBtn.setObjectName("applyResolutionBtn")
@@ -445,6 +455,7 @@ class Ui_MainWindow(object):
         self.c.setTabText(self.c.indexOf(self.tab_3), _translate("MainWindow", "Output"))
         self.groupBox_19.setTitle(_translate("MainWindow", "Settings"))
         self.label_46.setText(_translate("MainWindow", "Resolution"))
+        self.label_44.setText(_translate("MainWindow", "Show guides"))
         self.applyResolutionBtn.setText(_translate("MainWindow", "Apply"))
         self.groupBox_21.setTitle(_translate("MainWindow", "Output"))
         self.label_47.setText(_translate("MainWindow", "Page width"))
