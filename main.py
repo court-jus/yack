@@ -19,14 +19,11 @@ from wand.color import Color
 # YACK
 from ui.main_ui import Ui_MainWindow
 
-WORK_RESOLUTION = 50
-PWIDTH = 2480
-PHEIGHT = 3508
-
 class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, filename=None):
         super(Yack, self).__init__()
         self.setupUi(self)
+        self.filename = filename
         self.inputScene = QtWidgets.QGraphicsScene()
         self.cardScene = QtWidgets.QGraphicsScene()
         self.outputScene = QtWidgets.QGraphicsScene()
@@ -70,8 +67,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.outputShiftHor, self.outputShiftVert,
             self.outputInnerWidth, self.outputInnerHeight,
         ]:
-            if WORK_RESOLUTION != 300:
-                widget.setValue(int(widget.value() * WORK_RESOLUTION / 300))
+            if self.workResolution.value() != 300:
+                widget.setValue(int(widget.value() * self.workResolution.value() / 300))
         for widget in [
             self.inputCardWidth, self.inputCardHeight,
             self.inputRows, self.inputColumns,
@@ -84,11 +81,13 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.outputRows, self.outputColumns,
             self.outputShiftHor, self.outputShiftVert,
             self.outputInnerWidth, self.outputInnerHeight,
+            self.outputPageWidth, self.outputPageHeight,
         ]:
             widget.valueChanged.connect(lambda v: self.showOutputPage())
         self.inputIgnoredPages.textEdited.connect(lambda v: self.computeIgnoredPages())
-        if filename:
-            self.openFile(filename)
+        self.applyResolutionBtn.clicked.connect(lambda v: self.changeResolution())
+        if self.filename:
+            self.openFile(self.filename)
 
     # Choose and update current
     def computeIgnoredPages(self):
@@ -142,6 +141,10 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.showCard, page=self.currentPage, card=self.currentCard,
                 force=True)
 
+    def changeResolution(self):
+        if self.filename:
+            self.openFile(self.filename)
+
     def updateAll(self):
         self.showPixmap(
             self.inputScene, 'page{0}'.format(self.currentPage),
@@ -173,10 +176,10 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         scene.addPixmap(self.getPixmap(*args, **kwargs))
 
     def showFullPage(self, page=0):
-        with Image(blob=self._image, resolution=WORK_RESOLUTION) as img:
+        with Image(blob=self._image, resolution=self.workResolution.value()) as img:
             if page >= len(img.sequence):
                 return QtGui.QPixmap()
-            page = Image(img.sequence[page], resolution=WORK_RESOLUTION)
+            page = Image(img.sequence[page], resolution=self.workResolution.value())
             xpm = page.make_blob(format='xpm')
             pix = QtGui.QPixmap()
             pix.loadFromData(xpm)
@@ -195,8 +198,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         ncards = oC * oR
         nincards = self.inputColumns.value() * self.inputRows.value()
         firstcard = page * ncards
-        pageWidth = PWIDTH * WORK_RESOLUTION / 300
-        pageHeight = PHEIGHT * WORK_RESOLUTION / 300
+        pageWidth = self.outputPageWidth.value() * self.workResolution.value() / 300
+        pageHeight = self.outputPageHeight.value() * self.workResolution.value() / 300
         allCardsWidth = oC * oCW + oC * oIW + oIW
         allCardsHeight = oR * oCH + oR * oIH + oIH
         mL = (pageWidth - allCardsWidth) / 2
@@ -245,7 +248,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def openFile(self, filename):
         self._image_cache = {}
-        with Image(filename=filename, resolution=WORK_RESOLUTION) as img:
+        with Image(filename=filename, resolution=self.workResolution.value()) as img:
             self.allPages = list(range(len(img.sequence)))
             self.activePages = self.allPages[:]
             self._center = [s/2 for s in img.size]
@@ -259,7 +262,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         total_cards = len(pages) * ncards
         current_card = 0
         self.statusbar.showMessage("Exporting...")
-        with Image(blob=self._image, resolution=WORK_RESOLUTION) as img:
+        with Image(blob=self._image, resolution=self.workResolution.value()) as img:
             for p in pages:
                 page = img.sequence[p]
                 for c in range(ncards):
@@ -283,8 +286,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         oSV = self.outputShiftVert.value()
         ncards = oC * oR
         nincards = self.inputColumns.value() * self.inputRows.value()
-        pageWidth = int(PWIDTH * WORK_RESOLUTION / 300)
-        pageHeight = int(PHEIGHT * WORK_RESOLUTION / 300)
+        pageWidth = int(self.outputPageWidth.value() * self.workResolution.value() / 300)
+        pageHeight = int(self.outputPageHeight.value() * self.workResolution.value() / 300)
         allCardsWidth = oC * oCW + oC * oIW + oIW
         allCardsHeight = oR * oCH + oR * oIH + oIH
         mL = int((pageWidth - allCardsWidth) / 2)
@@ -299,13 +302,13 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 firstcard = oPageNum * ncards
                 page = Image(width=pageWidth, height=pageHeight)
                 draw(page)
-                img = Image(blob=self._image, resolution=WORK_RESOLUTION)
+                img = Image(blob=self._image, resolution=self.workResolution.value())
                 for cardnumber in range(ncards):
                     self.statusbar.showMessage("Exporting... {0} {1}".format(oPageNum, cardnumber))
                     cardidx = cardnumber + firstcard
                     inpage = self.activePages[cardidx // nincards]
                     incard = cardidx % nincards
-                    inputpage = Image(img.sequence[inpage], resolution=WORK_RESOLUTION)
+                    inputpage = Image(img.sequence[inpage], resolution=self.workResolution.value())
                     l, t, w, h = self.getCropCoords(card=incard)
                     inputcard = inputpage[l:l+w, t:t+h]
                     # scale to output
