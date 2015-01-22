@@ -306,7 +306,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 for cardnumber in range(ncards):
                     self.statusbar.showMessage("Exporting... {0} {1}".format(oPageNum, cardnumber))
                     cardidx = cardnumber + firstcard
-                    inpage = self.activePages[cardidx // nincards]
+                    try:
+                        inpage = self.activePages[cardidx // nincards]
+                    except IndexError:
+                        # We have more output cards than input cards
+                        # we then take the first page again
+                        inpage = self.activePages[0]
                     incard = cardidx % nincards
                     inputpage = Image(img.sequence[inpage], resolution=self.workResolution.value())
                     l, t, w, h = self.getCropCoords(card=incard)
