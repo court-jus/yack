@@ -257,6 +257,9 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.updateAll()
 
     def exportCards(self):
+        dirname = QtWidgets.QFileDialog.getExistingDirectory(self, "Export cards to...")
+        if not dirname:
+            return
         pages = self.activePages
         ncards = self.inputColumns.value() * self.inputRows.value()
         total_cards = len(pages) * ncards
@@ -271,7 +274,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                     left, top, width, height = self.getCropCoords(c)
                     time.sleep(0.250)
                     with page[left:left+width, top:top+height] as card:
-                        card.save(filename='page{0}card{1}.png'.format(p, c))
+                        card.save(filename=os.path.join(dirname, 'page{0}card{1}.png'.format(p, c)))
         self.statusbar.showMessage("Export done.", 1500)
 
     def exportOutput(self):
