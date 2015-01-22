@@ -275,6 +275,10 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage("Export done.", 1500)
 
     def exportOutput(self):
+        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save output to...", None,
+            "PDF (*.pdf);;All files (*)")
+        if not filename:
+            return
         self.statusbar.showMessage("Exporting...")
         oR = self.outputRows.value()
         oC = self.outputColumns.value()
@@ -329,7 +333,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 outputImage.sequence.append(page)
                 page.close()
             del outputImage.sequence[0]
-            outputImage.save(filename='output.pdf')
+            outputImage.save(filename=filename)
 
         self.statusbar.showMessage("Export done.", 1500)
 
