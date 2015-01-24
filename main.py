@@ -28,6 +28,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cardScene = QtWidgets.QGraphicsScene()
         self.outputScene = QtWidgets.QGraphicsScene()
         self._image = None
+        self._oldResolution = self.workResolution.value()
         self._image_cache = {}
         self._center = [0, 0]
         self.currentPage = 0
@@ -128,7 +129,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         if relCard is not None:
             self.currentCard = (self.currentCard + relCard) % cardCount
         self.currentDisplay.setText(
-            "{0}/{1} ({2}) - {2}/{3}".format(self.currentPageIdx + 1, len(self.activePages),
+            "{0}/{1} ({2}) - {3}/{4}".format(self.currentPageIdx + 1, len(self.activePages),
                                        self.currentPage + 1,
                                        self.currentCard + 1, cardCount)
         )
@@ -142,6 +143,18 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 force=True)
 
     def changeResolution(self):
+        if self._oldResolution is not None:
+            fact = float(self.workResolution.value()) / float(self._oldResolution)
+            for w in [
+                self.inputCardWidth, self.inputCardHeight,
+                self.inputShiftHor, self.inputShiftVert,
+                self.inputInnerWidth, self.inputInnerHeight,
+                self.outputCardWidth, self.outputCardHeight,
+                self.outputShiftHor, self.outputShiftVert,
+                self.outputInnerWidth, self.outputInnerHeight,
+            ]:
+                w.setValue(int(w.value() * fact))
+                self._oldResolution = self.workResolution.value()
         if self.filename:
             self.openFile(self.filename)
 
@@ -195,10 +208,10 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         shiftedv = self._center[1] - self.inputShiftVert.value()
         if self.showGuides.isChecked():
             self.inputScene.addRect(0, 0, pageWidth, pageHeight)
-            brush = QtGui.QBrush(QtGui.QColor('#ff0000'))
-            pen = QtGui.QPen(QtGui.QColor('#ff0000'))
-            self.inputScene.addRect(shiftedh-1, shiftedv-10, 2, 20, pen=pen, brush=brush)
-            self.inputScene.addRect(shiftedh-10, shiftedv-1, 20, 2, pen=pen, brush=brush)
+            for i in range(self.inputRows.value() * self.inputColumns.value()):
+                l, t, w, h = self.getCropCoords(i)
+                pen = QtGui.QPen(QtGui.QColor('#ff0000'))
+                self.inputScene.addRect(l, t, w, h, pen=pen)
 
     def showOutputPage(self, page=0):
         self.clearScene(self.outputScene)
@@ -409,14 +422,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         middle_col = ic / 2
         left = (
             self._center[0] - self.inputShiftHor.value() +
-            (colnum - middle_col) * self.inputCardWidth.value() -
-            (self.inputCardWidth.value() / 2) * (ic % 2 > 0) +
+            (colnum - middle_col) * self.inputCardWidth.value() +
             self.inputInnerWidth.value() / 2
         )
         top = (
             self._center[1] - self.inputShiftVert.value() +
-            (rownum - middle_row) * self.inputCardHeight.value() -
-            (self.inputCardHeight.value() / 2) * (ir % 2 > 0) +
+            (rownum - middle_row) * self.inputCardHeight.value() +
             self.inputInnerHeight.value() / 2
         )
         width = self.inputCardWidth.value() - self.inputInnerWidth.value()
