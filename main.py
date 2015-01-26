@@ -228,8 +228,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         firstcard = page * ncards
         pageWidth = self.outputPageWidth.value() * self.workResolution.value() / 300
         pageHeight = self.outputPageHeight.value() * self.workResolution.value() / 300
-        allCardsWidth = oC * oCW + oC * oIW + oIW
-        allCardsHeight = oR * oCH + oR * oIH + oIH
+        allCardsWidth = oC * oCW + oC + oIW
+        allCardsHeight = oR * oCH + oR + oIH
         mL = (pageWidth - allCardsWidth) / 2
         mT = (pageHeight - allCardsHeight) / 2
         self.outputScene.addRect(0, 0, pageWidth, pageHeight)
@@ -242,13 +242,13 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             incard = cardidx % nincards
             pix = self.showCard(page=inpage, card=incard)
             if pix:
-                pix = pix.scaled(oCW, oCH)
+                pix = pix.scaled(oCW - oIW, oCH - oIH)
                 item = self.outputScene.addPixmap(pix)
                 row = cardnumber // oC
                 col = cardnumber % oC
                 item.setPos(
-                    col * (oCW + oIW) + oSH + mL + oIW,
-                    row * (oCH + oIH) + oSV + mT + oIH,
+                    col * oCW + oSH + mL + oIW,
+                    row * oCH + oSV + mT + oIH,
                 )
 
     def showCard(self, page=0, card=0):
