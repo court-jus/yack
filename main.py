@@ -1,6 +1,7 @@
 # -*- config: utf-8 -*-
 
 import sys
+import argparse
 import pdb
 import traceback
 import os
@@ -20,7 +21,8 @@ from wand.color import Color
 from ui.main_ui import Ui_MainWindow
 
 class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self, filename=None):
+    def __init__(self, filename=None, inputlayout=None, outputlayout=None,
+                 resolution=300, output=None, extract=None):
         super(Yack, self).__init__()
         self.setupUi(self)
         self.filename = filename
@@ -60,6 +62,11 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             lambda: self.dictToLayout(self.layoutToDict(), 'output'))
         self.openOutputLayoutButton.clicked.connect(lambda: self.openLayout('output'))
         self.saveOutputLayoutButton.clicked.connect(lambda: self.saveLayout('output'))
+        self.workResolution.setValue(resolution)
+        if inputlayout is not None:
+            self.openLayout('input', filename=inputlayout)
+        if outputlayout is not None:
+            self.openLayout('output', filename=outputlayout)
         for widget in [
             self.inputCardWidth, self.inputCardHeight,
             self.inputShiftHor, self.inputShiftVert,
@@ -91,6 +98,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.applyResolutionBtn.clicked.connect(lambda v: self.changeResolution())
         if self.filename:
             self.openFile(self.filename)
+        if output:
+            self.exportOutput(output)
+        if extract:
+            self.exportCards(extract)
+        if output or extract:
+            sys.exit(0)
 
     # Choose and update current
     def computeIgnoredPages(self):
@@ -284,8 +297,9 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.setCurrent(page=0, card=0)
             self.updateAll()
 
-    def exportCards(self):
-        dirname = QtWidgets.QFileDialog.getExistingDirectory(self, "Export cards to...")
+    def exportCards(self, dirname=None):
+        if dirname is None:
+            dirname = QtWidgets.QFileDialog.getExistingDirectory(self, "Export cards to...")
         if not dirname:
             return
         pages = self.activePages
@@ -305,9 +319,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                         card.save(filename=os.path.join(dirname, 'page{0}card{1}.png'.format(p, c)))
         self.statusbar.showMessage("Export done.", 1500)
 
-    def exportOutput(self):
-        filename, _ = QtWidgets.QFileDialog.getSaveFileName(self, "Save output to...", None,
-            "PDF (*.pdf);;All files (*)")
+    def exportOutput(self, filename=None):
+        if filename is None:
+            filename, _ = QtWidgets.QFileDialog.getSaveFileName(
+                self, "Save output to...", None,
+                "PDF (*.pdf);;All files (*)",
+            )
         if not filename:
             return
         self.statusbar.showMessage("Exporting...")
@@ -368,9 +385,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.statusbar.showMessage("Export done.", 1500)
 
-    def openLayout(self, layout='input'):
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open layout file...", None,
-            "JSON (*.json);;All files (*)")
+    def openLayout(self, layout='input', filename=None):
+        if filename is None:
+            filename, _ = QtWidgets.QFileDialog.getOpenFileName(
+                self, "Open layout file...", None,
+                "JSON (*.json);;All files (*)",
+            )
         if filename:
             try:
                 with open(filename, 'r') as fh:
@@ -437,9 +457,21 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
 if __name__ == '__main__':
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument('inputfile', metavar='FILE', nargs='?')
+    parser.add_argument('-I', '--input-layout', dest='inputlayout', action='store')
+    parser.add_argument('-O', '--output-layout', dest='outputlayout', action='store')
+    parser.add_argument('-r', '--resolution', dest='resolution', action='store', default=300, type=int)
+    parser.add_argument('-o', '--output', dest='outputfile', action='store')
+    parser.add_argument('-x', '--extract-to', dest='extract', action='store')
+    args = parser.parse_args()
     app = QtWidgets.QApplication(sys.argv)
 
-    yack = Yack(filename=sys.argv[1] if len(sys.argv) > 1 else None)
+    yack = Yack(
+        filename=args.inputfile, inputlayout=args.inputlayout,
+        outputlayout=args.outputlayout, resolution=args.resolution,
+        output=args.outputfile, extract=args.extract,
+    )
     yack.show()
 
     sys.exit(app.exec_())
