@@ -22,10 +22,12 @@ Actively developed, open for test from whoever is willing to "do it the hard way
 - extract all the cards to individual files
 - describe the output layout
 - preview the expected output
+- export the output to a PDF file
+- add crop marks
+- batch processing
 
 ## What is next on the roadmap :
-- have the tool generate an output PDF
-- create some package for easy installation on Linux and Windows (sorry, you Mac users but I don't own a Mac so I can't work on it)
+ - see issues on the github page
 
 ----
 
