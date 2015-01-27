@@ -30,7 +30,6 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cardScene = QtWidgets.QGraphicsScene()
         self.outputScene = QtWidgets.QGraphicsScene()
         self._image = None
-        self._oldResolution = self.workResolution.value()
         self._image_cache = {}
         self._center = [0, 0]
         self.currentPage = 0
@@ -44,8 +43,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         # Menu
         self.actionExit.triggered.connect(self.close)
         self.actionOpen.triggered.connect(self.chooseFile)
-        self.actionSaveCards.triggered.connect(self.exportCards)
-        self.actionSaveOutput.triggered.connect(self.exportOutput)
+        self.actionSaveCards.triggered.connect(lambda: self.exportCards())
+        self.actionSaveOutput.triggered.connect(lambda: self.exportOutput())
         # Top buttons
         self.rotateButton.clicked.connect(self.rotate)
         self.zoomInButton.clicked.connect(lambda: self.zoom(1.5))
@@ -63,6 +62,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.openOutputLayoutButton.clicked.connect(lambda: self.openLayout('output'))
         self.saveOutputLayoutButton.clicked.connect(lambda: self.saveLayout('output'))
         self.workResolution.setValue(resolution)
+        self._oldResolution = self.workResolution.value()
         if inputlayout is not None:
             self.openLayout('input', filename=inputlayout)
         if outputlayout is not None:
@@ -74,9 +74,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.outputCardWidth, self.outputCardHeight,
             self.outputShiftHor, self.outputShiftVert,
             self.outputInnerWidth, self.outputInnerHeight,
+            self.cropMarksLength, self.cropMarksThickness,
+            self.cropMarksCenter,
         ]:
             if self.workResolution.value() != 300:
-                widget.setValue(int(widget.value() * self.workResolution.value() / 300))
+                if widget.value() > 0:
+                    widget.setValue(max(1, int(widget.value() * self.workResolution.value() / 300)))
         for widget in [
             self.inputCardWidth, self.inputCardHeight,
             self.inputRows, self.inputColumns,
@@ -91,13 +94,17 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.outputShiftHor, self.outputShiftVert,
             self.outputInnerWidth, self.outputInnerHeight,
             self.outputPageWidth, self.outputPageHeight,
+            self.cropMarksLength, self.cropMarksThickness,
+            self.cropMarksCenter,
         ]:
             widget.valueChanged.connect(lambda v: self.showOutputPage())
         self.showGuides.stateChanged.connect(lambda v: self.showInputPage())
+        self.cropMarksInner.stateChanged.connect(lambda v: self.showOutputPage())
+        self.cropMarksColor.textEdited.connect(lambda v: self.showInputPage())
         self.inputIgnoredPages.textEdited.connect(lambda v: self.computeIgnoredPages())
         self.applyResolutionBtn.clicked.connect(lambda v: self.changeResolution())
         if self.filename:
-            self.openFile(self.filename)
+            self.openFile(self.filename, batch=(output or extract))
         if output:
             self.exportOutput(output)
         if extract:
@@ -157,6 +164,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def changeResolution(self):
         if self._oldResolution is not None:
+            if self._oldResolution == self.workResolution.value():
+                return
             fact = float(self.workResolution.value()) / float(self._oldResolution)
             for w in [
                 self.inputCardWidth, self.inputCardHeight,
@@ -165,9 +174,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.outputCardWidth, self.outputCardHeight,
                 self.outputShiftHor, self.outputShiftVert,
                 self.outputInnerWidth, self.outputInnerHeight,
+                self.cropMarksLength, self.cropMarksThickness,
+                self.cropMarksCenter,
             ]:
                 w.setValue(int(w.value() * fact))
                 self._oldResolution = self.workResolution.value()
+            self.zoom(1.0/fact)
         if self.filename:
             self.openFile(self.filename)
 
@@ -249,6 +261,45 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         brush = QtGui.QBrush(QtGui.QColor(self.outputInnerColor.text()))
         pen = QtGui.QPen(QtGui.QColor('#ffffff'))
         self.outputScene.addRect(mL, mT, allCardsWidth, allCardsHeight, pen=pen, brush=brush)
+        if self.cropMarksThickness.value() > 0:
+            cMT = self.cropMarksThickness.value()
+            cML = self.cropMarksLength.value()
+            cMC = self.cropMarksCenter.value()
+            cMI = self.cropMarksInner.isChecked()
+            pen = QtGui.QPen(QtGui.QColor(self.cropMarksColor.text()), cMT)
+            for coln in range(self.outputColumns.value() + 1):
+                for rown in range(self.outputRows.value() + 1):
+                    if (coln > 0 and coln < self.outputColumns.value() and
+                        rown > 0 and rown < self.outputRows.value() and
+                        not cMI
+                    ):
+                        continue
+                    cent = (coln * oCW + oSH + mL + oIW / 2,
+                            rown * oCH + oSV + mT + oIH / 2)
+                    if cMI or coln == 0:
+                        self.outputScene.addLine(
+                            cent[0] - cML, cent[1],
+                            cent[0] - cMC, cent[1],
+                            pen=pen,
+                        )
+                    if cMI or coln == self.outputColumns.value():
+                        self.outputScene.addLine(
+                            cent[0] + cML, cent[1],
+                            cent[0] + cMC, cent[1],
+                            pen=pen,
+                        )
+                    if cMI or rown == 0:
+                        self.outputScene.addLine(
+                            cent[0], cent[1] - cML,
+                            cent[0], cent[1] - cMC,
+                            pen=pen,
+                        )
+                    if cMI or rown == self.outputRows.value():
+                        self.outputScene.addLine(
+                            cent[0], cent[1] + cML,
+                            cent[0], cent[1] + cMC,
+                            pen=pen,
+                        )
         for cardnumber in range(ncards):
             cardidx = cardnumber + firstcard
             inpage = cardidx // nincards
@@ -287,15 +338,16 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         if filename:
             self.openFile(filename)
 
-    def openFile(self, filename):
+    def openFile(self, filename, batch=False):
         self._image_cache = {}
         with Image(filename=filename, resolution=self.workResolution.value()) as img:
             self.allPages = list(range(len(img.sequence)))
             self.activePages = self.allPages[:]
             self._center = [s/2 for s in img.size]
             self._image = img.make_blob()
-            self.setCurrent(page=0, card=0)
-            self.updateAll()
+            if not batch:
+                self.setCurrent(page=0, card=0)
+                self.updateAll()
 
     def exportCards(self, dirname=None):
         if dirname is None:
@@ -349,6 +401,46 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         draw = Drawing()
         draw.fill_color = Color(self.outputInnerColor.text())
         draw.rectangle(left=mL, top=mT, width=allCardsWidth, height=allCardsHeight)
+        if self.cropMarksThickness.value() > 0:
+            cMT = self.cropMarksThickness.value()
+            cML = self.cropMarksLength.value()
+            cMC = self.cropMarksCenter.value()
+            cMI = self.cropMarksInner.isChecked()
+            draw.fill_color = Color(self.cropMarksColor.text())
+            for coln in range(self.outputColumns.value() + 1):
+                for rown in range(self.outputRows.value() + 1):
+                    if (coln > 0 and coln < self.outputColumns.value() and
+                        rown > 0 and rown < self.outputRows.value() and
+                        not cMI
+                    ):
+                        continue
+                    cent = (coln * (oCW + oIW) + oSH + mL + oIW / 2,
+                            rown * (oCH + oIH) + oSV + mT + oIH / 2)
+                    def drawrectangle(**kwargs):
+                        newvals = {}
+                        for k, v in kwargs.items():
+                            newvals[k] = max(0, int(v))
+                        draw.rectangle(**newvals)
+                    if cMI or coln == 0:
+                        drawrectangle(
+                            left=cent[0] - cML, top=cent[1]-cMT/2,
+                            right=cent[0] - cMC, bottom=cent[1]+cMT/2,
+                        )
+                    if cMI or coln == self.outputColumns.value():
+                        drawrectangle(
+                            left=cent[0] + cMC, top=cent[1]-cMT/2,
+                            right=cent[0] + cML, bottom=cent[1]+cMT/2,
+                        )
+                    if cMI or rown == 0:
+                        drawrectangle(
+                            left=cent[0]-cMT/2, top=cent[1] - cML,
+                            right=cent[0]+cMT/2, bottom=cent[1] - cMC,
+                        )
+                    if cMI or rown == self.outputRows.value():
+                        drawrectangle(
+                            left=cent[0]-cMT/2, top=cent[1] + cMC,
+                            right=cent[0]+cMT/2, bottom=cent[1] + cML,
+                        )
         with Image(width=pageWidth, height=pageHeight) as outputImage:
             for oPageNum in range(totalOutputPages):
                 firstcard = oPageNum * ncards
@@ -415,9 +507,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def layoutToDict(self, layout='input'):
         result = {}
         for attrname in dir(self):
-            if attrname.startswith(layout):
+            if (
+                attrname.startswith(layout) or
+                layout == 'output' and attrname.startswith('cropMarks')
+            ):
                 widget = getattr(self, attrname)
-                key = attrname[len(layout):]
+                key = attrname
                 if hasattr(widget, 'value'):
                     result[key] = widget.value()
                 elif hasattr(widget, 'text'):
@@ -426,8 +521,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def dictToLayout(self, layoutDict, layout='input'):
         for k, v in layoutDict.items():
-            if hasattr(self, layout + k):
+            widget = None
+            if hasattr(self, k):
+                widget = getattr(self, k)
+            elif hasattr(self, layout + k):
                 widget = getattr(self, layout + k)
+            if widget:
                 if hasattr(widget, 'setValue'):
                     widget.setValue(int(v))
                 elif hasattr(widget, 'setText'):

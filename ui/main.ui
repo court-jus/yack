@@ -174,9 +174,17 @@
        </size>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="page">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>296</width>
+         <height>565</height>
+        </rect>
+       </property>
        <attribute name="label">
         <string>Settings</string>
        </attribute>
@@ -198,7 +206,7 @@
                 <number>9999</number>
                </property>
                <property name="value">
-                <number>150</number>
+                <number>300</number>
                </property>
               </widget>
              </item>
@@ -303,7 +311,7 @@
          <x>0</x>
          <y>0</y>
          <width>296</width>
-         <height>593</height>
+         <height>565</height>
         </rect>
        </property>
        <attribute name="label">
@@ -554,7 +562,7 @@
          <x>0</x>
          <y>0</y>
          <width>296</width>
-         <height>593</height>
+         <height>565</height>
         </rect>
        </property>
        <attribute name="label">
@@ -790,6 +798,93 @@
            </widget>
           </item>
          </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_2">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>296</width>
+         <height>565</height>
+        </rect>
+       </property>
+       <attribute name="label">
+        <string>Crop marks</string>
+       </attribute>
+       <layout class="QFormLayout" name="formLayout_10">
+        <item row="0" column="0">
+         <widget class="QSpinBox" name="cropMarksLength">
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+          <property name="value">
+           <number>80</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QLabel" name="label_24">
+          <property name="text">
+           <string>Length</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QSpinBox" name="cropMarksThickness">
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+          <property name="value">
+           <number>3</number>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_25">
+          <property name="text">
+           <string>Thickness</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QSpinBox" name="cropMarksCenter">
+          <property name="maximum">
+           <number>9999</number>
+          </property>
+          <property name="value">
+           <number>20</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_27">
+          <property name="text">
+           <string>Center</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLineEdit" name="cropMarksColor">
+          <property name="text">
+           <string>#000000</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="label_26">
+          <property name="text">
+           <string>Color</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" colspan="2">
+         <widget class="QCheckBox" name="cropMarksInner">
+          <property name="text">
+           <string>Inner crop marks</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
