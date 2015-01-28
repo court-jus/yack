@@ -113,7 +113,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             sys.exit(0)
 
     # Choose and update current
-    def computeIgnoredPages(self):
+    def computeIgnoredPages(self, batch=False):
         ignored = []
         self.activePages = self.allPages[:]
         try:
@@ -129,7 +129,9 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                     start += 1
             for i in ignored:
                 self.activePages.remove(i)
-            self.setCurrent(page=0)
+            if not batch:
+                self.setCurrent(page=0, card=0)
+                self.updateAll()
         except:
             traceback.print_exc()
             self.statusbar.showMessage("Error: can't understand your ignored pages input.", 1500)
@@ -302,7 +304,12 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                         )
         for cardnumber in range(ncards):
             cardidx = cardnumber + firstcard
-            inpage = cardidx // nincards
+            try:
+                inpage = self.activePages[cardidx // nincards]
+            except IndexError:
+                # We have more output cards than input cards
+                # we then take the first page again
+                inpage = self.activePages[0]
             incard = cardidx % nincards
             pix = self.showCard(page=inpage, card=incard)
             if pix:
@@ -345,9 +352,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self.activePages = self.allPages[:]
             self._center = [s/2 for s in img.size]
             self._image = img.make_blob()
-            if not batch:
-                self.setCurrent(page=0, card=0)
-                self.updateAll()
+            self.computeIgnoredPages(batch=batch)
 
     def exportCards(self, dirname=None):
         if dirname is None:
