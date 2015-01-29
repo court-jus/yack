@@ -26,6 +26,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         super(Yack, self).__init__()
         self.setupUi(self)
         self.filename = filename
+        self.cardsDir = None
         self.inputScene = QtWidgets.QGraphicsScene()
         self.cardScene = QtWidgets.QGraphicsScene()
         self.outputScene = QtWidgets.QGraphicsScene()
@@ -35,7 +36,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.currentPage = 0
         self.currentPageIdx = 0
         self.activePages = [0]
-        self.currentCard = 4
+        self.currentCard = 0
         self.inputGView.setScene(self.inputScene)
         self.cardGView.setScene(self.cardScene)
         self.cardGView.scale(3, 3)
@@ -43,6 +44,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         # Menu
         self.actionExit.triggered.connect(self.close)
         self.actionOpen.triggered.connect(self.chooseFile)
+        self.actionOpenCardsDir.triggered.connect(self.chooseCardDir)
         self.actionSaveCards.triggered.connect(lambda: self.exportCards())
         self.actionSaveOutput.triggered.connect(lambda: self.exportOutput())
         # Top buttons
@@ -129,17 +131,17 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                     start += 1
             for i in ignored:
                 self.activePages.remove(i)
-            if not batch:
-                self.setCurrent(page=0, card=0)
-                self.updateAll()
         except:
             traceback.print_exc()
             self.statusbar.showMessage("Error: can't understand your ignored pages input.", 1500)
+        if not batch:
+            self.setCurrent(page=0, card=0)
+            self.updateAll()
 
     def setCurrent(self, page=None, card=None, relPage=None, relCard=None):
         cp = self.currentPage
         cc = self.currentCard
-        cardCount = self.inputRows.value() * self.inputColumns.value()
+        cardCount = self.inputRows.value() * self.inputColumns.value() * len(self.activePages)
         if page is not None:
             if page in self.activePages:
                 self.currentPage = page
@@ -157,12 +159,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         )
         if self.currentPage != cp:
             self.showInputPage(page=self.currentPage)
-        if self.currentPage != cp or self.currentCard != cc:
-            self.showPixmap(
-                self.cardScene,
-                'page{0}card{1}'.format(self.currentPage, self.currentCard),
-                self.showCard, page=self.currentPage, card=self.currentCard,
-                force=True)
+        if self.currentCard != cc:
+            self.showCardPixmap(card=self.currentCard)
 
     def changeResolution(self):
         if self._oldResolution is not None:
@@ -187,17 +185,11 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def updateAll(self):
         self.showInputPage(page=self.currentPage, force=True)
-        self.showPixmap(
-            self.cardScene,
-            'page{0}card{1}'.format(self.currentPage, self.currentCard),
-            self.showCard, page=self.currentPage, card=self.currentCard,
-            force=True)
+        self.showCardPixmap(card=self.currentCard, force=True)
         self.showOutputPage()
 
     def updateCard(self):
-        self.showPixmap(self.cardScene, 'page{0}card{1}'.format(self.currentPage, self.currentCard),
-                        self.showCard, page=self.currentPage, card=self.currentCard,
-                        force=True)
+        self.showCardPixmap(card=self.currentCard)
         self.showOutputPage()
 
     def clearScene(self, scene):
@@ -209,9 +201,9 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self._image_cache[ident] = fn(*args, **kwargs)
         return self._image_cache[ident]
 
-    def showPixmap(self, scene, *args, **kwargs):
-        self.clearScene(scene)
-        scene.addPixmap(self.getPixmap(*args, **kwargs))
+    def showCardPixmap(self, card=0, force=False):
+        self.clearScene(self.cardScene)
+        self.cardScene.addPixmap(self.getCardPix(card, force=force))
 
     def showFullPage(self, page=0):
         with Image(blob=self._image, resolution=self.workResolution.value()) as img:
@@ -225,6 +217,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def showInputPage(self, page=0, force=False):
         self.clearScene(self.inputScene)
+        if self.cardsDir:
+            return
         pix = self.getPixmap(
             'page{0}'.format(self.currentPage),
             self.showFullPage, page=page, force=force)
@@ -311,7 +305,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 # we then take the first page again
                 inpage = self.activePages[0]
             incard = cardidx % nincards
-            pix = self.showCard(page=inpage, card=incard)
+            pix = self.getCardPix(cardnumber, force=True)
             if pix:
                 pix = pix.scaled(oCW - oIW, oCH - oIH)
                 item = self.outputScene.addPixmap(pix)
@@ -322,10 +316,19 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                     row * oCH + oSV + mT + oIH,
                 )
 
-    def showCard(self, page=0, card=0):
+    def getCardPix(self, card, force=False):
+        # Used for preview
+        if self.cardsDir:
+            img = self.cardImage(card, force=force)
+            xpm = img.make_blob(format='xpm')
+            pix = QtGui.QPixmap()
+            pix.loadFromData(xpm)
+            return pix
+        page = card // (self.inputRows.value() * self.inputColumns.value())
+        card = card % (self.inputRows.value() * self.inputColumns.value())
         fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
-        left, top, width, height = self.getCropCoords(card)
-        return fullpage.copy(left, top, width, height)
+        l, t, w, h = self.getCropCoords(card)
+        return fullpage.copy(l, t, w, h)
 
     # Manipulate the view
     def rotate(self):
@@ -345,8 +348,15 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         if filename:
             self.openFile(filename)
 
+    def chooseCardDir(self):
+        dirname = QtWidgets.QFileDialog.getExistingDirectory(self, "Open cards directory...")
+        if dirname:
+            self.cardsDir = dirname
+            self.updateAll()
+
     def openFile(self, filename, batch=False):
         self._image_cache = {}
+        self.cardsDir = None
         with Image(filename=filename, resolution=self.workResolution.value()) as img:
             self.allPages = list(range(len(img.sequence)))
             self.activePages = self.allPages[:]
@@ -354,7 +364,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             self._image = img.make_blob()
             self.computeIgnoredPages(batch=batch)
 
-    def exportCards(self, dirname=None):
+    def _exportCards(self, dirname=None):
         if dirname is None:
             dirname = QtWidgets.QFileDialog.getExistingDirectory(self, "Export cards to...")
         if not dirname:
@@ -374,6 +384,23 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                     time.sleep(0.250)
                     with page[left:left+width, top:top+height] as card:
                         card.save(filename=os.path.join(dirname, 'page{0}card{1}.png'.format(p, c)))
+        self.statusbar.showMessage("Export done.", 1500)
+
+    def exportCards(self, dirname=None):
+        if dirname is None:
+            dirname = QtWidgets.QFileDialog.getExistingDirectory(self, "Export cards to...")
+        if not dirname:
+            return
+        pages = self.activePages
+        ncards = self.inputColumns.value() * self.inputRows.value()
+        total_cards = len(pages) * ncards
+        current_card = 0
+        self.statusbar.showMessage("Exporting...")
+        for cN in range(total_cards):
+            self.statusbar.showMessage(
+                "Exporting... card {0}".format(cN + 1))
+            card = self.cardImage(cN, force=True)
+            card.save(filename=os.path.join(dirname, 'card{0}.png'.format(cN)))
         self.statusbar.showMessage("Export done.", 1500)
 
     def exportOutput(self, filename=None):
@@ -451,20 +478,10 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 firstcard = oPageNum * ncards
                 page = Image(width=pageWidth, height=pageHeight)
                 draw(page)
-                img = Image(blob=self._image, resolution=self.workResolution.value())
                 for cardnumber in range(ncards):
                     self.statusbar.showMessage("Exporting... {0} {1}".format(oPageNum, cardnumber))
                     cardidx = cardnumber + firstcard
-                    try:
-                        inpage = self.activePages[cardidx // nincards]
-                    except IndexError:
-                        # We have more output cards than input cards
-                        # we then take the first page again
-                        inpage = self.activePages[0]
-                    incard = cardidx % nincards
-                    inputpage = Image(img.sequence[inpage], resolution=self.workResolution.value())
-                    l, t, w, h = self.getCropCoords(card=incard)
-                    inputcard = inputpage[l:l+w, t:t+h]
+                    inputcard = self.cardImage(cardidx, force=True)
                     # scale to output
                     inputcard.resize(width=oCW, height=oCH)
                     row = cardnumber // oC
@@ -507,6 +524,28 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
             except ValueError:
                 traceback.print_exc()
                 self.statusbar.showMessage("Error loading or decoding layout file.")
+
+    def cardImage(self, card, force=False):
+        if card in self._image_cache and not force:
+            return self._image_cache[card]
+        page_idx = card // (self.inputRows.value() * self.inputColumns.value())
+        card_idx = card %  (self.inputRows.value() * self.inputColumns.value())
+        page = self.activePages[page_idx]
+        img = None
+        if self.cardsDir is not None:
+            cardname = os.listdir(self.cardsDir)[card]
+            img = Image(
+                filename=os.path.join(self.cardsDir, cardname),
+                resolution=self.workResolution.value()
+            )
+            self._image_cache[card] = img
+            return img
+        with Image(blob=self._image, resolution=self.workResolution.value()) as img:
+            p = img.sequence[page]
+            l, t, w, h = self.getCropCoords(card_idx)
+            img = p[l:l+w, t:t+h]
+        self._image_cache[card] = img
+        return img
 
     # Helpers
     def layoutToDict(self, layout='input'):
