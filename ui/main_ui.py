@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main.ui'
 #
-# Created: Tue Jan 27 13:27:18 2015
+# Created: Thu Jan 29 13:55:07 2015
 #      by: PyQt5 UI code generator 5.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -110,7 +110,7 @@ class Ui_MainWindow(object):
         self.toolBox.setMinimumSize(QtCore.QSize(296, 0))
         self.toolBox.setObjectName("toolBox")
         self.page = QtWidgets.QWidget()
-        self.page.setGeometry(QtCore.QRect(0, 0, 296, 565))
+        self.page.setGeometry(QtCore.QRect(0, 0, 193, 262))
         self.page.setObjectName("page")
         self.verticalLayout_12 = QtWidgets.QVBoxLayout(self.page)
         self.verticalLayout_12.setObjectName("verticalLayout_12")
@@ -292,7 +292,7 @@ class Ui_MainWindow(object):
         self.verticalLayout.addLayout(self.verticalLayout_7)
         self.toolBox.addItem(self.page1, "")
         self.page2 = QtWidgets.QWidget()
-        self.page2.setGeometry(QtCore.QRect(0, 0, 296, 565))
+        self.page2.setGeometry(QtCore.QRect(0, 0, 204, 551))
         self.page2.setObjectName("page2")
         self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.page2)
         self.verticalLayout_8.setObjectName("verticalLayout_8")
@@ -409,7 +409,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_8.addLayout(self.verticalLayout_3)
         self.toolBox.addItem(self.page2, "")
         self.page_2 = QtWidgets.QWidget()
-        self.page_2.setGeometry(QtCore.QRect(0, 0, 296, 565))
+        self.page_2.setGeometry(QtCore.QRect(0, 0, 150, 153))
         self.page_2.setObjectName("page_2")
         self.formLayout_10 = QtWidgets.QFormLayout(self.page_2)
         self.formLayout_10.setObjectName("formLayout_10")
@@ -466,7 +466,10 @@ class Ui_MainWindow(object):
         self.actionSaveCards.setObjectName("actionSaveCards")
         self.actionSaveOutput = QtWidgets.QAction(MainWindow)
         self.actionSaveOutput.setObjectName("actionSaveOutput")
+        self.actionOpenCardsDir = QtWidgets.QAction(MainWindow)
+        self.actionOpenCardsDir.setObjectName("actionOpenCardsDir")
         self.menuTest.addAction(self.actionOpen)
+        self.menuTest.addAction(self.actionOpenCardsDir)
         self.menuTest.addSeparator()
         self.menuTest.addAction(self.actionSaveOutput)
         self.menuTest.addAction(self.actionSaveCards)
@@ -552,4 +555,5 @@ class Ui_MainWindow(object):
         self.actionSaveCards.setText(_translate("MainWindow", "Save cards..."))
         self.actionSaveCards.setToolTip(_translate("MainWindow", "Save each card as a separate file (for POD services)"))
         self.actionSaveOutput.setText(_translate("MainWindow", "Save output"))
+        self.actionOpenCardsDir.setText(_translate("MainWindow", "Open cards dir..."))
 

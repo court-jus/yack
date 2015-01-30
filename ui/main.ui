@@ -181,8 +181,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>296</width>
-         <height>565</height>
+         <width>193</width>
+         <height>262</height>
         </rect>
        </property>
        <attribute name="label">
@@ -561,8 +561,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>296</width>
-         <height>565</height>
+         <width>204</width>
+         <height>551</height>
         </rect>
        </property>
        <attribute name="label">
@@ -806,8 +806,8 @@
         <rect>
          <x>0</x>
          <y>0</y>
-         <width>296</width>
-         <height>565</height>
+         <width>150</width>
+         <height>153</height>
         </rect>
        </property>
        <attribute name="label">
@@ -906,6 +906,7 @@
      <string>File</string>
     </property>
     <addaction name="actionOpen"/>
+    <addaction name="actionOpenCardsDir"/>
     <addaction name="separator"/>
     <addaction name="actionSaveOutput"/>
     <addaction name="actionSaveCards"/>
@@ -936,6 +937,11 @@
   <action name="actionSaveOutput">
    <property name="text">
     <string>Save output</string>
+   </property>
+  </action>
+  <action name="actionOpenCardsDir">
+   <property name="text">
+    <string>Open cards dir...</string>
    </property>
   </action>
  </widget>
