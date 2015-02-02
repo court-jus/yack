@@ -258,8 +258,17 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         mT = (pageHeight - allCardsHeight) / 2
         self.outputScene.addRect(0, 0, pageWidth, pageHeight)
         brush = QtGui.QBrush(QtGui.QColor(self.outputInnerColor.text()))
-        pen = QtGui.QPen(QtGui.QColor('#ffffff'))
-        self.outputScene.addRect(mL, mT, allCardsWidth, allCardsHeight, pen=pen, brush=brush)
+        pen = QtGui.QPen(QtGui.QColor(self.outputInnerColor.text()))
+        for coln in range(self.outputColumns.value()):
+            for rown in range(self.outputRows.value()):
+                left = mL + coln * oCW
+                top = mT + rown * oCH
+                if oIH:
+                    self.outputScene.addRect(left, top, oCW + oIW, oIH, pen=pen, brush=brush)
+                    self.outputScene.addRect(left, top + oCH, oCW + oIW, oIH, pen=pen, brush=brush)
+                if oIW:
+                    self.outputScene.addRect(left, top, oIW, oCH + oIH, pen=pen, brush=brush)
+                    self.outputScene.addRect(left + oCW, top, oIW, oCH + oIH, pen=pen, brush=brush)
         if self.cropMarksThickness.value() > 0:
             cMT = self.cropMarksThickness.value()
             cML = self.cropMarksLength.value()
@@ -401,6 +410,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         total_cards = len(pages) * ncards
         current_card = 0
         self.statusbar.showMessage("Exporting...")
+        # TODO : (optional : add inner margin)
         for cN in range(total_cards):
             self.statusbar.showMessage(
                 "Exporting... card {0}".format(cN + 1))
@@ -438,7 +448,22 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         totalOutputPages = totalInputCards // ncards + (1 if totalInputCards % ncards > 0 else 0)
         draw = Drawing()
         draw.fill_color = Color(self.outputInnerColor.text())
-        draw.rectangle(left=mL, top=mT, width=allCardsWidth, height=allCardsHeight)
+        def drawrectangle(**kwargs):
+            newvals = {}
+            for k, v in kwargs.items():
+                newvals[k] = max(0, int(v))
+            draw.rectangle(**newvals)
+        draw.fill_color = Color(self.outputInnerColor.text())
+        for coln in range(self.outputColumns.value()):
+            for rown in range(self.outputRows.value()):
+                left = mL + coln * oCW
+                top = mT + rown * oCH
+                if oIH:
+                    drawrectangle(left=left, top=top, right=left + oCW + oIW, bottom=top + oIH)
+                    drawrectangle(left=left, top=top + oCH, right=left + oCW + oIW, bottom=top + oCH + oIH)
+                if oIW:
+                    drawrectangle(left=left, top=top, right=left + oIW, bottom=top + oCH + oIH)
+                    drawrectangle(left=left + oCW, top=top, right=left + oCW + oIW, bottom=top + oCH + oIH)
         if self.cropMarksThickness.value() > 0:
             cMT = self.cropMarksThickness.value()
             cML = self.cropMarksLength.value()
@@ -454,11 +479,6 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                         continue
                     cent = (coln * oCW + oSH + mL + oIW / 2,
                             rown * oCH + oSV + mT + oIH / 2)
-                    def drawrectangle(**kwargs):
-                        newvals = {}
-                        for k, v in kwargs.items():
-                            newvals[k] = max(0, int(v))
-                        draw.rectangle(**newvals)
                     if cMI or coln == 0:
                         drawrectangle(
                             left=cent[0] - cML, top=cent[1]-cMT/2,
