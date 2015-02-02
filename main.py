@@ -108,6 +108,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.applyResolutionBtn.clicked.connect(lambda v: self.changeResolution())
         if self.filename:
             self.openFile(self.filename, batch=(output or extract))
+        if self.cardsDir and not (output or extract):
+            self.updateAll()
         if output:
             self.exportOutput(output)
         if extract:
@@ -306,7 +308,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 # we then take the first page again
                 inpage = self.activePages[0]
             incard = cardidx % nincards
-            pix = self.getCardPix(cardnumber, force=True)
+            pix = self.getCardPix(cardnumber)
             if pix:
                 pix = pix.scaled(oCW - oIW, oCH - oIH)
                 item = self.outputScene.addPixmap(pix)
@@ -320,11 +322,13 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def getCardPix(self, card, force=False):
         # Used for preview
         if self.cardsDir:
-            img = self.cardImage(card, force=force)
-            xpm = img.make_blob(format='xpm')
-            pix = QtGui.QPixmap()
-            pix.loadFromData(xpm)
-            return pix
+            if force or 'pix{0}'.format(card) not in self._image_cache:
+                img = self.cardImage(card, force=force)
+                xpm = img.make_blob(format='xpm')
+                pix = QtGui.QPixmap()
+                pix.loadFromData(xpm)
+                self._image_cache['pix{0}'.format(card)] = pix
+            return self._image_cache['pix{0}'.format(card)]
         page = card // (self.inputRows.value() * self.inputColumns.value())
         card = card % (self.inputRows.value() * self.inputColumns.value())
         fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
