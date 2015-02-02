@@ -22,11 +22,12 @@ from ui.main_ui import Ui_MainWindow
 
 class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, filename=None, inputlayout=None, outputlayout=None,
-                 resolution=300, output=None, extract=None):
+                 resolution=300, output=None, extract=None, cardsdir=None,
+                 ):
         super(Yack, self).__init__()
         self.setupUi(self)
         self.filename = filename
-        self.cardsDir = None
+        self.cardsDir = cardsdir
         self.inputScene = QtWidgets.QGraphicsScene()
         self.cardScene = QtWidgets.QGraphicsScene()
         self.outputScene = QtWidgets.QGraphicsScene()
@@ -428,6 +429,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         allCardsHeight = oR * oCH
         mL = int((pageWidth - allCardsWidth) / 2)
         mT = int((pageHeight - allCardsHeight) / 2)
+        print(mL, mT, pageWidth, allCardsWidth, pageHeight, allCardsHeight)
         totalInputCards = nincards * len(self.activePages)
         totalOutputPages = totalInputCards // ncards + (1 if totalInputCards % ncards > 0 else 0)
         draw = Drawing()
@@ -607,6 +609,7 @@ if __name__ == '__main__':
     parser.add_argument('-r', '--resolution', dest='resolution', action='store', default=300, type=int)
     parser.add_argument('-o', '--output', dest='outputfile', action='store')
     parser.add_argument('-x', '--extract-to', dest='extract', action='store')
+    parser.add_argument('-d', '--cards-dir', dest='cardsdir', action='store')
     args = parser.parse_args()
     app = QtWidgets.QApplication(sys.argv)
 
@@ -614,6 +617,7 @@ if __name__ == '__main__':
         filename=args.inputfile, inputlayout=args.inputlayout,
         outputlayout=args.outputlayout, resolution=args.resolution,
         output=args.outputfile, extract=args.extract,
+        cardsdir=args.cardsdir,
     )
     yack.show()
 
