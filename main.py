@@ -560,14 +560,20 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         card_idx = card %  (self.inputRows.value() * self.inputColumns.value())
         img = None
         if self.cardsDir is not None:
-            cardname = os.listdir(self.cardsDir)[card]
+            try:
+                cardname = os.listdir(self.cardsDir)[card]
+            except IndexError:
+                cardname = os.listdir(self.cardsDir)[0]
             img = Image(
                 filename=os.path.join(self.cardsDir, cardname),
                 resolution=self.workResolution.value()
             )
             self._image_cache[card] = img
             return img
-        page = self.activePages[page_idx]
+        try:
+            page = self.activePages[page_idx]
+        except IndexError:
+            page = self.activePages[0]
         with Image(blob=self._image, resolution=self.workResolution.value()) as img:
             p = img.sequence[page]
             l, t, w, h = self.getCropCoords(card_idx)
