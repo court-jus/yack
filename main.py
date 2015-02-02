@@ -445,6 +445,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         mT = int((pageHeight - allCardsHeight) / 2)
         print(mL, mT, pageWidth, allCardsWidth, pageHeight, allCardsHeight)
         totalInputCards = nincards * len(self.activePages)
+        if self.cardsDir:
+            totalInputCards = len(os.listdir(self.cardsDir))
         totalOutputPages = totalInputCards // ncards + (1 if totalInputCards % ncards > 0 else 0)
         draw = Drawing()
         draw.fill_color = Color(self.outputInnerColor.text())
