@@ -424,8 +424,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         nincards = self.inputColumns.value() * self.inputRows.value()
         pageWidth = int(self.outputPageWidth.value() * self.workResolution.value() / 300)
         pageHeight = int(self.outputPageHeight.value() * self.workResolution.value() / 300)
-        allCardsWidth = oC * oCW + oC * oIW + oIW
-        allCardsHeight = oR * oCH + oR * oIH + oIH
+        allCardsWidth = oC * oCW
+        allCardsHeight = oR * oCH
         mL = int((pageWidth - allCardsWidth) / 2)
         mT = int((pageHeight - allCardsHeight) / 2)
         totalInputCards = nincards * len(self.activePages)
@@ -446,8 +446,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                         not cMI
                     ):
                         continue
-                    cent = (coln * (oCW + oIW) + oSH + mL + oIW / 2,
-                            rown * (oCH + oIH) + oSV + mT + oIH / 2)
+                    cent = (coln * oCW + oSH + mL + oIW / 2,
+                            rown * oCH + oSV + mT + oIH / 2)
                     def drawrectangle(**kwargs):
                         newvals = {}
                         for k, v in kwargs.items():
