@@ -483,13 +483,13 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                     cardidx = cardnumber + firstcard
                     inputcard = self.cardImage(cardidx, force=True)
                     # scale to output
-                    inputcard.resize(width=oCW, height=oCH)
+                    inputcard.resize(width=oCW-oIW, height=oCH-oIH)
                     row = cardnumber // oC
                     col = cardnumber % oC
                     page.composite(
                         inputcard,
-                        int(col * (oCW + oIW) + oSH + mL + oIW),
-                        int(row * (oCH + oIH) + oSV + mT + oIH),
+                        int(col * oCW + oSH + mL + oIW),
+                        int(row * oCH + oSV + mT + oIH),
                     )
                     inputcard.close()
                 outputImage.sequence.append(page)
