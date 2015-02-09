@@ -330,6 +330,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def getCardPix(self, card, force=False):
         # Used for preview
+        if card in self._image_cache and not force:
+            return self._image_cache[card]
         if self.cardsDir:
             if force or 'pix{0}'.format(card) not in self._image_cache:
                 img = self.cardImage(card, force=force)
@@ -342,7 +344,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         card = card % (self.inputRows.value() * self.inputColumns.value())
         fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
         l, t, w, h = self.getCropCoords(card)
-        return fullpage.copy(l, t, w, h)
+        self._image_cache[card] = fullpage.copy(l, t, w, h)
+        return self._image_cache[card]
 
     # Manipulate the view
     def rotate(self):
@@ -501,7 +504,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                             left=cent[0]-cMT/2, top=cent[1] + cMC,
                             right=cent[0]+cMT/2, bottom=cent[1] + cML,
                         )
-        with Image(width=pageWidth, height=pageHeight) as outputImage:
+        with Image(width=pageWidth, height=pageHeight, resolution=self.workResolution.value()) as outputImage:
             for oPageNum in range(totalOutputPages):
                 firstcard = oPageNum * ncards
                 page = Image(width=pageWidth, height=pageHeight)
@@ -509,6 +512,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
                 for cardnumber in range(ncards):
                     self.statusbar.showMessage("Exporting... {0} {1}".format(oPageNum, cardnumber))
                     cardidx = cardnumber + firstcard
+                    print("card", cardidx)
                     inputcard = self.cardImage(cardidx, force=True)
                     # scale to output
                     inputcard.resize(width=oCW-oIW, height=oCH-oIH)
