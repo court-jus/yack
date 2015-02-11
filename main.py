@@ -165,7 +165,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.currentPage != cp:
             self.showInputPage(page=self.currentPage)
         if self.currentCard != cc:
-            self.showCardPixmap(card=self.currentCard)
+            self.showCardPixmap(card=self.currentCard, force=True)
 
     def changeResolution(self):
         if self._oldResolution is not None:
@@ -194,7 +194,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.showOutputPage()
 
     def updateCard(self):
-        self.showCardPixmap(card=self.currentCard)
+        self.showCardPixmap(card=self.currentCard, force=True)
         self.showOutputPage()
 
     def clearScene(self, scene):
@@ -377,6 +377,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self._image_cache = {}
         self.cardsDir = None
         with Image(filename=filename, resolution=self.workResolution.value()) as img:
+            print("type", img.type)
             img.type = 'truecolor'
             self.allPages = list(range(len(img.sequence)))
             self.activePages = self.allPages[:]
