@@ -123,6 +123,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self.activePages = self.allPages[:]
         try:
             for i in self.inputIgnoredPages.text().split(','):
+                if not i:
+                    continue
                 if '-' in i:
                     start, end = map(int, i.split('-'))
                     if end < start:
@@ -375,6 +377,7 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         self._image_cache = {}
         self.cardsDir = None
         with Image(filename=filename, resolution=self.workResolution.value()) as img:
+            img.type = 'truecolor'
             self.allPages = list(range(len(img.sequence)))
             self.activePages = self.allPages[:]
             self._center = [s/2 for s in img.size]
@@ -565,9 +568,9 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         img = None
         if self.cardsDir is not None:
             try:
-                cardname = os.listdir(self.cardsDir)[card]
+                cardname = sorted(os.listdir(self.cardsDir))[card]
             except IndexError:
-                cardname = os.listdir(self.cardsDir)[0]
+                cardname = sorted(os.listdir(self.cardsDir))[0]
             img = Image(
                 filename=os.path.join(self.cardsDir, cardname),
                 resolution=self.workResolution.value()
