@@ -448,8 +448,8 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
         pageHeight = int(self.outputPageHeight.value() * self.workResolution.value() / 300)
         allCardsWidth = oC * oCW
         allCardsHeight = oR * oCH
-        mL = int((pageWidth - allCardsWidth) / 2)
-        mT = int((pageHeight - allCardsHeight) / 2)
+        mL = int((pageWidth - allCardsWidth - oIW) / 2)
+        mT = int((pageHeight - allCardsHeight - oIH) / 2)
         print(mL, mT, pageWidth, allCardsWidth, pageHeight, allCardsHeight)
         totalInputCards = nincards * len(self.activePages)
         if self.cardsDir:
