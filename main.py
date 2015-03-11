@@ -332,22 +332,23 @@ class Yack(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def getCardPix(self, card, force=False):
         # Used for preview
-        if card in self._image_cache and not force:
-            return self._image_cache[card]
+        cache_key = 'pix{0}'.format(card)
+        if cache_key in self._image_cache and not force:
+            return self._image_cache[cache_key]
         if self.cardsDir:
-            if force or 'pix{0}'.format(card) not in self._image_cache:
+            if force or cache_key not in self._image_cache:
                 img = self.cardImage(card, force=force)
                 xpm = img.make_blob(format='xpm')
                 pix = QtGui.QPixmap()
                 pix.loadFromData(xpm)
-                self._image_cache['pix{0}'.format(card)] = pix
-            return self._image_cache['pix{0}'.format(card)]
+                self._image_cache[cache_key] = pix
+            return self._image_cache[cache_key]
         page = card // (self.inputRows.value() * self.inputColumns.value())
         card = card % (self.inputRows.value() * self.inputColumns.value())
         fullpage = self.getPixmap('page{0}'.format(page), self.showFullPage, page=page)
         l, t, w, h = self.getCropCoords(card)
-        self._image_cache[card] = fullpage.copy(l, t, w, h)
-        return self._image_cache[card]
+        self._image_cache[cache_key] = fullpage.copy(l, t, w, h)
+        return self._image_cache[cache_key]
 
     # Manipulate the view
     def rotate(self):
